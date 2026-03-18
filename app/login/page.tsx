@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase' 
-import { useRouter, useSearchParams } from 'next/navigation' // Agregamos useSearchParams
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '@/components/Navbar'
@@ -14,15 +14,15 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null) // Para mensajes elegantes
   
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   // ESCUCHAR ERRORES DESDE LA URL (Si el vestidor lo expulsó)
   useEffect(() => {
-    const errorType = searchParams.get('error')
+    const params = new URLSearchParams(window.location.search)
+    const errorType = params.get('error')
     if (errorType === 'account_deleted') {
       setErrorMsg('ACCESO DENEGADO: Tu perfil no existe o fue revocado por la liga.')
     }
-  }, [searchParams])
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
