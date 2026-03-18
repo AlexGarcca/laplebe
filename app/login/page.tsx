@@ -29,10 +29,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans relative overflow-hidden selection:bg-[#fcc200]/30">
       
-      {/* NAVBAR UNIFICADO (Ya funciona en móvil con hamburguesa) */}
       <Navbar />
 
-      {/* DECORACIÓN DE FONDO (Optimizado para no estorbar en scroll móvil) */}
+      {/* DECORACIÓN DE FONDO */}
       <div className="absolute top-[10%] left-[-10%] w-[80%] md:w-[50%] h-[50%] bg-[#fcc200]/5 rounded-full blur-[100px] md:blur-[140px] pointer-events-none" />
       <div className="absolute bottom-[10%] right-[-10%] w-[80%] md:w-[50%] h-[50%] bg-[#fcc200]/5 rounded-full blur-[100px] md:blur-[140px] pointer-events-none" />
 
@@ -43,7 +42,7 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full"
         >
-          {/* CARD DE LOGIN APPLE STYLE */}
+          {/* CARD DE LOGIN */}
           <div className="bg-[#141414]/80 border border-white/5 p-8 md:p-14 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl backdrop-blur-xl">
             <div className="text-center mb-10 md:mb-12">
               <div className="flex justify-center mb-6 md:mb-8">
@@ -69,7 +68,13 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 ml-2">Código Secreto</label>
+                <div className="flex justify-between items-center px-2">
+                  <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Código Secreto</label>
+                  {/* ENLACE PARA RECUPERAR CONTRASEÑA */}
+                  <Link href="/reset-password" title="recuperar" className="text-[8px] font-bold text-zinc-700 hover:text-[#fcc200] transition-colors uppercase tracking-widest">
+                    ¿Olvidaste el acceso?
+                  </Link>
+                </div>
                 <input 
                   type="password" 
                   required
@@ -80,13 +85,26 @@ export default function LoginPage() {
                 />
               </div>
 
-              <button 
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#fcc200] text-black font-black uppercase italic tracking-[0.2em] py-4 md:py-5 rounded-2xl hover:bg-[#fbd34d] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_15px_40px_rgba(252,194,0,0.15)] mt-4"
-              >
-                {loading ? 'AUTENTICANDO...' : 'INICIAR SESIÓN'}
-              </button>
+              <div className="pt-4">
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#fcc200] text-black font-black uppercase italic tracking-[0.2em] py-4 md:py-5 rounded-2xl hover:bg-[#fbd34d] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_15px_40px_rgba(252,194,0,0.15)]"
+                >
+                  {loading ? 'AUTENTICANDO...' : 'INICIAR SESIÓN'}
+                </button>
+
+                {/* BOTÓN PARA CREAR CUENTA / SIGN UP */}
+                <div className="mt-8 text-center">
+                  <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-widest mb-3">¿Eres un nuevo presidente?</p>
+                  <Link 
+                    href="/signup"
+                    className="inline-block w-full py-4 md:py-5 border border-white/10 rounded-2xl text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/5 hover:border-white/20 transition-all"
+                  >
+                    Crear mi acceso oficial
+                  </Link>
+                </div>
+              </div>
             </form>
           </div>
 

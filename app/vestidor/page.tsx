@@ -125,11 +125,21 @@ export default function VestidorPage() {
     setEnviando(false);
   };
 
-  if (!perfil) return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center font-black tracking-[0.5em] text-[#fcc200] animate-pulse">
-      SINCRONIZANDO VESTIDOR...
+  if (!perfil) return <div className="...">SINCRONIZANDO...</div>
+
+// NUEVO BLOQUEO DE SEGURIDAD
+if (!perfil.aprobado) return (
+  <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6 text-center">
+    <div className="w-20 h-20 bg-[#fcc200]/10 rounded-full flex items-center justify-center mb-6 animate-pulse">
+      <ShieldCheck size={40} className="text-[#fcc200]" />
     </div>
-  )
+    <h2 className="text-2xl font-black uppercase italic text-white mb-2 text-balance">Acceso en Revisión</h2>
+    <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest max-w-xs">
+      Tu cuenta ha sido creada. El Admin debe asignarte un equipo para entrar al vestidor.
+    </p>
+    <button onClick={() => supabase.auth.signOut().then(() => router.push('/login'))} className="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 hover:text-white transition-colors">Cerrar Sesión</button>
+  </div>
+)
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans">
