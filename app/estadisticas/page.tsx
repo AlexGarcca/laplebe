@@ -16,17 +16,29 @@ export default function EstadisticasPage() {
       setLoading(true)
       let result: any[] = []
 
+      // 1. OBTENER DATOS DE LA TABLA MAESTRA DE ESTADÍSTICAS
+      const { data: statsRaw } = await supabase
+        .from('estadisticas_jugadores')
+        .select('*, jugador:jugador_id(nombre, posicion), equipo:equipo_id(nombre, escudo_url)')
+
+      if (!statsRaw) {
+        setLoading(false)
+        return
+      }
+
+      // 2. PROCESAR LOS DATOS SEGÚN LA PESTAÑA ACTIVA
       if (activeTab === 'goles') {
-        const { data: res } = await supabase.from('registro_goles').select('jugador_id, jugadores(nombre, equipos(nombre, escudo_url))')
-        result = processCounts(res ?? [], 'Goles')
+        result = processStats(statsRaw, 'goles', 'Goles')
       } else if (activeTab === 'asistencias') {
-        const { data: res } = await supabase.from('registro_asistencias').select('jugador_id, jugadores(nombre, equipos(nombre, escudo_url))')
-        result = processCounts(res ?? [], 'Asistencias')
+        result = processStats(statsRaw, 'asistencias', 'Asistencias')
       } else if (activeTab === 'mvp') {
-        const { data: res } = await supabase.from('registro_mvp').select('jugador_id, jugadores(nombre, equipos(nombre, escudo_url))')
-        result = processCounts(res ?? [], 'MVPs')
+        // Asumiremos que MVP es el de mejor calificación promedio (mínimo 2 partidos jugados)
+        result = processAverage(statsRaw, 'calificacion', 'Rating Avg')
+      } else if (activeTab === 'porteros') {
+        // Filtrar solo los que recibieron goles y promediar por partido jugado
+        result = processPorteros(statsRaw)
       } else if (activeTab === 'tarjetas') {
-        result = await fetchTeamFairPlay() 
+        result = await fetchTeamFairPlay(statsRaw) 
       }
 
       setData(result)
@@ -35,56 +47,95 @@ export default function EstadisticasPage() {
     fetchStats()
   }, [activeTab])
 
-  const fetchTeamFairPlay = async () => {
-    const { data: equipos } = await supabase
-      .from('equipos')
-      .select('id, nombre, escudo_url')
-      .not('nombre', 'ilike', '%draft%');
-
-    const { data: tarjetas } = await supabase.from('registro_tarjetas').select('tipo_tarjeta, jugadores(id_equipo)');
-
-    const teamStats = equipos?.map(equipo => {
-      const tarjetasEquipo = tarjetas?.filter(t => {
-        const playerInfo = Array.isArray(t.jugadores) ? t.jugadores[0] : t.jugadores;
-        return playerInfo?.id_equipo === equipo.id;
-      }) || [];
-
-      return {
-        id: equipo.id,
-        nombre: equipo.nombre,
-        escudo: equipo.escudo_url,
-        amarillas: tarjetasEquipo.filter(t => t.tipo_tarjeta === 'amarilla').length,
-        rojas: tarjetasEquipo.filter(t => t.tipo_tarjeta === 'roja').length,
-      };
-    }) || [];
-
-    return teamStats.sort((a, b) => (b.rojas + b.amarillas) - (a.rojas + a.amarillas));
-  };
-
-  const processCounts = (raw: any[], label: string) => {
+  // PROCESADOR GENÉRICO (Suma todo)
+  const processStats = (raw: any[], campo: string, label: string) => {
     const counts: any = {}
-    raw?.forEach(item => {
-      if (item.jugadores && item.jugadores.equipos) {
+    raw.forEach(item => {
+      if (item[campo] > 0 && item.jugador && item.equipo) {
         const id = item.jugador_id
         if (!counts[id]) {
           counts[id] = { 
-            nombre: item.jugadores.nombre, 
-            equipo: item.jugadores.equipos.nombre, 
-            escudo: item.jugadores.equipos.escudo_url, 
+            nombre: item.jugador.nombre, 
+            equipo: item.equipo.nombre, 
+            escudo: item.equipo.escudo_url, 
             valor: 0, 
             label 
           }
         }
-        counts[id].valor++
+        counts[id].valor += item[campo]
       }
     })
     return Object.values(counts).sort((a: any, b: any) => b.valor - a.valor)
   }
 
+  // PROCESADOR DE PROMEDIOS (Para Rating / MVP)
+  const processAverage = (raw: any[], campo: string, label: string) => {
+    const stats: any = {}
+    raw.forEach(item => {
+      if (item[campo] > 0 && item.jugador && item.equipo) {
+        const id = item.jugador_id
+        if (!stats[id]) {
+          stats[id] = { nombre: item.jugador.nombre, equipo: item.equipo.nombre, escudo: item.equipo.escudo_url, suma: 0, partidos: 0, label }
+        }
+        stats[id].suma += item[campo]
+        stats[id].partidos += 1
+      }
+    })
+    
+    // Calcular promedio y ordenar (Valor = Promedio con 1 decimal)
+    return Object.values(stats)
+      .filter((s: any) => s.partidos > 0) // Podrías cambiar a > 1 si quieres exigir mínimo 2 juegos
+      .map((s: any) => ({ ...s, valor: (s.suma / s.partidos).toFixed(1) }))
+      .sort((a: any, b: any) => parseFloat(b.valor) - parseFloat(a.valor))
+  }
+
+  // PROCESADOR DE PORTEROS (Menos goles recibidos es mejor. Mínimo 1 partido registrado)
+  const processPorteros = (raw: any[]) => {
+    const stats: any = {}
+    raw.forEach(item => {
+      // Usamos el campo goles_recibidos. Filtramos a los que realmente son porteros o jugaron de portero
+      if ((item.goles_recibidos >= 0 && item.jugador?.posicion === 'POR') || item.goles_recibidos > 0) {
+        const id = item.jugador_id
+        if (!stats[id]) {
+          stats[id] = { nombre: item.jugador.nombre, equipo: item.equipo.nombre, escudo: item.equipo.escudo_url, golesRecibidos: 0, partidos: 0, label: 'Goles/P' }
+        }
+        stats[id].golesRecibidos += item.goles_recibidos
+        stats[id].partidos += 1
+      }
+    })
+
+    return Object.values(stats)
+      .filter((s: any) => s.partidos > 0)
+      .map((s: any) => ({ ...s, valor: (s.golesRecibidos / s.partidos).toFixed(2) }))
+      .sort((a: any, b: any) => parseFloat(a.valor) - parseFloat(b.valor)) // OJO: Aquí se ordena de MENOR a MAYOR (es mejor recibir menos)
+  }
+
+  // PROCESADOR FAIR PLAY DE EQUIPOS
+  const fetchTeamFairPlay = async (statsRaw: any[]) => {
+    const { data: equipos } = await supabase.from('equipos').select('id, nombre, escudo_url').not('nombre', 'ilike', '%draft%')
+
+    const teamStats = equipos?.map(equipo => {
+      // Filtrar las stats que pertenecen a jugadores de este equipo
+      const statsEquipo = statsRaw.filter(s => s.equipo_id === equipo.id)
+      
+      const amarillas = statsEquipo.reduce((acc, curr) => acc + (curr.amarillas || 0), 0)
+      const azules = statsEquipo.reduce((acc, curr) => acc + (curr.azules || 0), 0)
+
+      return {
+        id: equipo.id,
+        nombre: equipo.nombre,
+        escudo: equipo.escudo_url,
+        amarillas,
+        azules,
+      }
+    }) || []
+
+    return teamStats.sort((a, b) => (b.azules + b.amarillas) - (a.azules + a.amarillas))
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans">
       <Navbar />
-
       <MatchTicker />
 
       <main className="max-w-5xl mx-auto p-6 md:p-8 md:py-20">
@@ -93,15 +144,15 @@ export default function EstadisticasPage() {
             <h1 className="text-4xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-6 leading-none">
               Líderes del <span className="text-[#fcc200]">Torneo</span>
             </h1>
-            {/* Selector de Tabs con Scroll Horizontal en móvil */}
+            
             <div className="flex overflow-x-auto pb-4 md:pb-0 md:justify-center gap-3 mt-8 no-scrollbar">
-              {['goles', 'asistencias', 'tarjetas', 'mvp'].map(tab => (
+              {['goles', 'asistencias', 'porteros', 'tarjetas', 'mvp'].map(tab => (
                 <button 
                   key={tab} 
                   onClick={() => setActiveTab(tab)}
                   className={`flex-none px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-[#fcc200] text-black shadow-xl scale-105' : 'bg-[#141414] text-zinc-500 border border-white/5 hover:text-white'}`}
                 >
-                  {tab}
+                  {tab === 'porteros' ? 'GUANTE ORO' : tab === 'tarjetas' ? 'FAIR PLAY' : tab}
                 </button>
               ))}
             </div>
@@ -113,7 +164,7 @@ export default function EstadisticasPage() {
             {loading ? (
               <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 text-zinc-700 font-black uppercase tracking-widest">Sincronizando Data...</motion.div>
             ) : data.length === 0 ? (
-              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 border border-white/5 rounded-[2.5rem] bg-[#141414] text-zinc-600 font-bold uppercase italic">Sin datos registrados.</motion.div>
+              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 border border-white/5 rounded-[2.5rem] bg-[#141414] text-zinc-600 font-bold uppercase italic">Sin datos registrados en esta categoría.</motion.div>
             ) : activeTab === 'tarjetas' ? (
               <motion.div key="fairplay" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="overflow-x-auto bg-[#141414] border border-white/5 rounded-[2.5rem] shadow-2xl">
                 <table className="w-full text-left min-w-125">
@@ -121,8 +172,8 @@ export default function EstadisticasPage() {
                     <tr>
                       <th className="px-6 py-5">#</th>
                       <th className="px-6 py-5">Equipo</th>
-                      <th className="px-6 py-5 text-center text-blue-500">Azul</th>
-                      <th className="px-6 py-5 text-center text-yellow-500">Ama.</th>
+                      <th className="px-6 py-5 text-center text-blue-500">Azules</th>
+                      <th className="px-6 py-5 text-center text-yellow-500">Amarillas</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -135,7 +186,7 @@ export default function EstadisticasPage() {
                             <span className="text-base font-black uppercase italic text-white group-hover:text-[#fcc200] transition-colors">{equipo.nombre}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-5 text-center text-xl font-black text-blue-500">{equipo.rojas}</td>
+                        <td className="px-6 py-5 text-center text-xl font-black text-blue-500">{equipo.azules}</td>
                         <td className="px-6 py-5 text-center text-xl font-black text-yellow-500">{equipo.amarillas}</td>
                       </tr>
                     ))}

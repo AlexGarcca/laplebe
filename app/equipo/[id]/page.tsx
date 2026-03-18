@@ -1,5 +1,5 @@
 'use client'
-import { supabase } from '../../lib/supabase'
+import { supabase } from '../../lib/supabase' // Asegúrate de que esta ruta relativa conecte bien con tu lib
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
@@ -41,6 +41,9 @@ export default function EquipoPage({ params }: { params: any }) {
 
   if (!equipo) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white font-bold">EQUIPO NO ENCONTRADO</div>
 
+  // Fallback por si a algún equipo le falta el color en la base de datos
+  const colorEquipo = equipo.color_hex || '#fcc200'
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans selection:bg-[#fcc200]/30">
       
@@ -51,28 +54,28 @@ export default function EquipoPage({ params }: { params: any }) {
         {/* Fondo con el color del equipo */}
         <div 
           className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-10 md:opacity-20 pointer-events-none" 
-          style={{ backgroundImage: `radial-gradient(circle at center, ${equipo.color_hex}60, transparent 70%)` }}
+          style={{ backgroundImage: `radial-gradient(circle at center, ${colorEquipo}60, transparent 70%)` }}
         ></div>
         
         <FadeInUp>
           <div className="max-w-7xl mx-auto relative z-10">
-            {/* Botón Volver - Más amigable en celular */}
+            {/* Botón Volver - Ahora te regresa a la lista de clubes */}
             <Link 
-              href="/" 
-              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-[#fcc200] transition-all mb-12 group"
+              href="/clubes" 
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-white transition-all mb-12 group"
             >
               <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-              Volver a la Liga
+              Directorio de Clubes
             </Link>
 
             <div className="flex flex-col md:flex-row items-center md:items-end gap-8 md:gap-12 text-center md:text-left">
               <img src={equipo.escudo_url} className="w-32 h-32 md:w-48 md:h-48 object-contain brightness-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" alt="Logo" />
               <div className="flex-1">
                 <span className="inline-block px-4 py-1 bg-white/5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-[0.4em] text-zinc-500 border border-white/5 mb-6">Club Oficial • Plebeians League</span>
-                <h1 className="text-5xl md:text-9xl font-black uppercase italic tracking-tighter leading-none mb-6" style={{ color: equipo.color_hex }}>
+                <h1 className="text-5xl md:text-9xl font-black uppercase italic tracking-tighter leading-none mb-6" style={{ color: colorEquipo }}>
                   {equipo.nombre}
                 </h1>
-                <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 text-zinc-400">
+                <div className="flex flex-col md:flex-row md:items-center justify-center md:justify-start gap-4 md:gap-6 text-zinc-400">
                   <p className="text-lg md:text-xl font-medium tracking-tight">Presi: <b className="text-white uppercase font-black">{equipo.presidente || '-'}</b></p>
                   <div className="h-4 w-px bg-white/10 hidden md:block"></div>
                   <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-zinc-600 italic">Est. 2026 • Split 3</p>
@@ -86,7 +89,7 @@ export default function EquipoPage({ params }: { params: any }) {
       <main className="max-w-7xl mx-auto p-6 md:p-20">
         <FadeInUp delay={0.2}>
           <div className="flex items-center gap-4 mb-12 md:mb-16">
-            <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: equipo.color_hex }}></div>
+            <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: colorEquipo }}></div>
             <h2 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter">Plantilla de Jugadores</h2>
           </div>
         </FadeInUp>
@@ -100,15 +103,15 @@ export default function EquipoPage({ params }: { params: any }) {
         ) : (
           <StaggeredGrid>
             {jugadoresOrdenados.map((jugador) => {
-              let colorEspecial = equipo.color_hex;
+              let colorEspecial = colorEquipo;
               if (jugador.tipo === 'Franquicia') colorEspecial = '#fcc200';
               if (jugador.tipo === 'Rescatado') colorEspecial = '#a1a1aa';
 
               return (
                 <GridItem key={jugador.id}>
-                  <div className="group relative bg-[#141414] rounded-4xl md:rounded-[2.5rem] border border-white/5 p-6 md:p-8 flex flex-col transition-all duration-500 hover:bg-[#1a1a1a] hover:border-[#fcc200]/20 shadow-2xl overflow-hidden h-full">
+                  <div className="group relative bg-[#141414] rounded-4xl md:rounded-[2.5rem] border border-white/5 p-6 md:p-8 flex flex-col transition-all duration-500 hover:bg-[#1a1a1a] hover:border-white/10 shadow-2xl overflow-hidden h-full cursor-default">
                     {/* Barra de color lateral dinámica */}
-                    <div className="absolute top-0 right-0 w-1 h-full opacity-30" style={{ backgroundColor: colorEspecial }}></div>
+                    <div className="absolute top-0 right-0 w-1 h-full opacity-30 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: colorEspecial }}></div>
 
                     <div className="flex justify-between items-start mb-8">
                       <span className="text-4xl md:text-5xl font-black italic tracking-tighter opacity-10 group-hover:opacity-40 transition-opacity" style={{ color: colorEspecial }}>{jugador.numero_camiseta || '00'}</span>

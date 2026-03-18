@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Settings, LayoutDashboard, LogOut } from 'lucide-react'
-import { useAuth } from '../app/context/AuthContext'
-import { supabase } from '../app/lib/supabase'
+import { Menu, X, Settings, LayoutDashboard, LogOut, Ticket } from 'lucide-react'
+import { useAuth } from '@/app/context/AuthContext'
+import { supabase } from '@/app/lib/supabase'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -13,10 +13,13 @@ export default function Navbar() {
   const { user, loading } = useAuth()
   const router = useRouter()
   
+  // 🔗 LISTA DE ENLACES ACTUALIZADA
   const links = [
     { name: 'Calendario', href: '/partidos' },
     { name: 'Posiciones', href: '/clasificacion' },
     { name: 'Estadísticas', href: '/estadisticas' },
+    { name: 'Clubes', href: '/clubes' }, // Nueva sección de equipos
+    { name: 'BET-ALV', href: '/bet-alv' }, // La zona de apuestas
   ]
 
   const isAdmin = user?.email === 'garcca29@gmail.com'
@@ -57,14 +60,18 @@ export default function Navbar() {
       </Link>
 
       {/* DESKTOP NAV */}
-      <div className="hidden md:flex gap-10 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 items-center">
+      <div className="hidden md:flex gap-8 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 items-center">
         {links.map((link) => (
-          <Link key={link.href} href={link.href} className="hover:text-[#fcc200] transition-colors cursor-pointer">
+          <Link 
+            key={link.href} 
+            href={link.href} 
+            className={`transition-colors cursor-pointer ${link.name === 'BET-ALV' ? 'text-[#fcc200]/60 hover:text-[#fcc200]' : 'hover:text-[#fcc200]'}`}
+          >
             {link.name}
           </Link>
         ))}
 
-        <div className="flex items-center gap-4 ml-6">
+        <div className="flex items-center gap-4 ml-4">
           {isAdmin && (
             <Link 
               href="/admin-plebe" 
@@ -86,7 +93,6 @@ export default function Navbar() {
                     <img src={perfil.equipos.escudo_url} className="w-full h-full object-contain" alt="Escudo" />
                   </div>
                 </Link>
-                {/* BOTÓN SALIR DESKTOP */}
                 <button 
                   onClick={handleLogout}
                   className="p-2 text-rose-500/50 hover:text-rose-500 transition-colors cursor-pointer hover:scale-110 active:scale-90"
@@ -118,7 +124,12 @@ export default function Navbar() {
             className="absolute top-full left-0 w-full bg-black/95 backdrop-blur-3xl border-b border-white/5 p-8 flex flex-col gap-6 md:hidden"
           >
             {links.map((link) => (
-              <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className="text-2xl font-black uppercase italic text-white cursor-pointer">
+              <Link 
+                key={link.href} 
+                href={link.href} 
+                onClick={() => setIsOpen(false)} 
+                className={`text-2xl font-black uppercase italic cursor-pointer ${link.name === 'BET-ALV' ? 'text-[#fcc200]' : 'text-white'}`}
+              >
                 {link.name}
               </Link>
             ))}
@@ -142,6 +153,16 @@ export default function Navbar() {
             ) : (
               <Link href="/login" onClick={() => setIsOpen(false)} className="mt-4 py-4 bg-[#fcc200] text-black text-center font-black uppercase italic rounded-2xl text-lg cursor-pointer">
                 Portal Presis
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link 
+                href="/admin-plebe" 
+                onClick={() => setIsOpen(false)}
+                className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] text-center mt-4"
+              >
+                — Panel Maestro —
               </Link>
             )}
           </motion.div>
