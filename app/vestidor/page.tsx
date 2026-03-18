@@ -119,94 +119,86 @@ export default function VestidorPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* PIZARRA TÁCTICA REDISEÑADA */}
-          <div className="lg:col-span-8 flex flex-col gap-6">
-            <div className="bg-[#141414] rounded-[3rem] border border-white/5 p-4 md:p-10 shadow-2xl">
-              <div className="flex justify-between items-center mb-8 px-2">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 flex items-center gap-2">
-                  <LayoutDashboard size={14} className="text-[#fcc200]" /> Pizarra Táctica
-                </h3>
-                <span className="text-[10px] font-bold uppercase italic text-zinc-700">Formación 4-1</span>
-              </div>
+          {/* PIZARRA TÁCTICA REDISEÑADA (4-1 FORMATION) */}
+<div className="lg:col-span-8 flex flex-col gap-6">
+  <div className="bg-[#141414] rounded-[3rem] border border-white/5 p-4 md:p-10 shadow-2xl">
+    <div className="flex justify-between items-center mb-6 px-2">
+      <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 flex items-center gap-2">
+        <LayoutDashboard size={14} className="text-[#fcc200]" /> Pizarra Táctica
+      </h3>
+      <span className="text-[10px] font-bold uppercase italic text-zinc-700">Formación 4-1</span>
+    </div>
 
-              {/* CANCHA CON POSICIONES CLARAS */}
-              <div className="relative w-full aspect-3/4 md:aspect-video bg-black rounded-[2.5rem] border border-white/10 p-4 flex flex-col justify-between overflow-hidden shadow-2xl">
-                
-                {/* LÍNEAS DEL CAMPO VISUALES */}
-                <div className="absolute inset-0 pointer-events-none opacity-20">
-                  <div className="absolute inset-4 border border-white/40 rounded-3xl" />
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border border-white/40 rounded-full" />
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-12 border-t border-x border-white/40" />
-                </div>
+    {/* CANCHA TÁCTICA */}
+    <div className="relative w-full aspect-4/3 md:aspect-video bg-[#050505] rounded-[2.5rem] border border-white/10 p-4 overflow-hidden shadow-2xl flex flex-col justify-center">
+      
+      {/* LÍNEAS DEL CAMPO VISUALES (Simplificadas para móvil) */}
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div className="absolute inset-4 border border-white/20 rounded-3xl" />
+        <div className="absolute top-1/2 left-0 w-full h-px bg-white/20" />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-48 h-20 border-t border-x border-white/20" />
+      </div>
 
-                {/* AREA DE ATAQUE (J3, J4) */}
-                <div className="relative z-10 flex justify-around mt-4">
-                  {[3, 4].map(n => (
-                    <div key={n} className="w-[42%] max-w-35 group">
-                      <div className="relative aspect-square bg-zinc-900/90 rounded-2xl border border-white/10 group-hover:border-[#fcc200]/50 transition-all flex flex-col items-center justify-center p-2 backdrop-blur-sm">
-                        <span className="text-[8px] font-black text-[#fcc200]/40 absolute top-2">+</span>
-                        <select 
-                          className="w-full bg-transparent text-[10px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none z-10"
-                          onChange={(e) => setFormacion({...formacion, [`j${n}`]: e.target.value})}
-                          value={formacion[`j${n}` as keyof typeof formacion]}
-                        >
-                          <option value="" className="bg-black text-zinc-500">ELEGIR</option>
-                          {jugadores.map(j => <option key={j.id} value={j.id} className="bg-black text-white">{j.nombre}</option>)}
-                        </select>
-                        <span className="text-xl font-light text-zinc-800 absolute pointer-events-none">+</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* AREA DE DEFENSA (J1, J2) */}
-                <div className="relative z-10 flex justify-around mb-24 md:mb-12">
-                  {[1, 2].map(n => (
-                    <div key={n} className="w-[42%] max-w-35 group">
-                      <div className="relative aspect-square bg-zinc-900/90 rounded-2xl border border-white/10 group-hover:border-[#fcc200]/50 transition-all flex flex-col items-center justify-center p-2 backdrop-blur-sm">
-                        <span className="text-[8px] font-black text-blue-400/30 absolute top-2">+</span>
-                        <select 
-                          className="w-full bg-transparent text-[10px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none z-10"
-                          onChange={(e) => setFormacion({...formacion, [`j${n}`]: e.target.value})}
-                          value={formacion[`j${n}` as keyof typeof formacion]}
-                        >
-                          <option value="" className="bg-black text-zinc-500">ELEGIR</option>
-                          {jugadores.map(j => <option key={j.id} value={j.id} className="bg-black text-white">{j.nombre}</option>)}
-                        </select>
-                        <span className="text-xl font-light text-zinc-800 absolute pointer-events-none">+</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* PORTERO (GK) */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[35%] max-w-30 z-20">
-                  <div className="relative aspect-square bg-[#fcc200]/5 rounded-2xl border-2 border-[#fcc200]/20 hover:border-[#fcc200] transition-all flex flex-col items-center justify-center p-2 backdrop-blur-md">
-                    <span className="text-[8px] font-black text-[#fcc200] absolute top-2 tracking-widest">PORTERO</span>
-                    <select 
-                      className="w-full bg-transparent text-[10px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none text-[#fcc200] z-10"
-                      onChange={(e) => setFormacion({...formacion, po: e.target.value})}
-                      value={formacion.po}
-                    >
-                      <option value="" className="bg-black text-[#fcc200]">GK</option>
-                      {jugadores.map(j => <option key={j.id} value={j.id} className="bg-black text-white">{j.nombre}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={handleConfirm}
-                disabled={enviando || !proximoPartido}
-                className="mt-8 w-full py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-30 shadow-xl shadow-[#fcc200]/10 flex items-center justify-center gap-3"
+      {/* FILA DE 4 JUGADORES */}
+      <div className="relative z-10 flex justify-between items-center w-full px-2 mb-8">
+        {[1, 2, 3, 4].map(n => (
+          <div key={n} className="w-[23%] max-w-30 group">
+            <div className="relative aspect-square bg-zinc-900/90 rounded-xl border border-white/10 group-hover:border-[#fcc200]/50 transition-all flex flex-col items-center justify-center backdrop-blur-sm">
+              <span className="text-[7px] font-black text-zinc-500 absolute top-1.5 uppercase">J{n}</span>
+              
+              <select 
+                className="w-full h-full bg-transparent text-[9px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none z-10 pt-2 px-1"
+                onChange={(e) => setFormacion({...formacion, [`j${n}`]: e.target.value})}
+                value={formacion[`j${n}` as keyof typeof formacion]}
               >
-                <ShieldCheck size={20} />
-                {enviando ? 'ENVIANDO...' : 'CONFIRMAR TITULARES'}
-              </button>
+                <option value="" className="bg-black text-zinc-600">+</option>
+                {jugadores.map(j => <option key={j.id} value={j.id} className="bg-black text-white">{j.nombre}</option>)}
+              </select>
+
+              {/* Icono + cuando está vacío */}
+              {!formacion[`j${n}` as keyof typeof formacion] && (
+                <span className="text-zinc-700 text-lg absolute pointer-events-none mt-2">+</span>
+              )}
             </div>
           </div>
+        ))}
+      </div>
 
+      {/* PORTERO (CENTRADO ABAJO) */}
+      <div className="relative z-10 flex justify-center w-full">
+        <div className="w-[25%] max-w-32.5 group">
+          <div className="relative aspect-square bg-[#fcc200]/5 rounded-xl border-2 border-[#fcc200]/20 group-hover:border-[#fcc200] transition-all flex flex-col items-center justify-center backdrop-blur-md">
+            <span className="text-[7px] font-black text-[#fcc200] absolute top-1.5 tracking-tighter uppercase">PORTERO</span>
+            
+            <select 
+              className="w-full h-full bg-transparent text-[9px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none text-[#fcc200] z-10 pt-2 px-1"
+              onChange={(e) => setFormacion({...formacion, po: e.target.value})}
+              value={formacion.po}
+            >
+              <option value="" className="bg-black text-[#fcc200]">GK</option>
+              {jugadores.map(j => <option key={j.id} value={j.id} className="bg-black text-white">{j.nombre}</option>)}
+            </select>
+
+            {!formacion.po && (
+              <span className="text-[#fcc200]/40 text-lg absolute pointer-events-none mt-2">+</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button 
+      onClick={handleConfirm}
+      disabled={enviando || !proximoPartido}
+      className="mt-8 w-full py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-30 shadow-xl shadow-[#fcc200]/10 flex items-center justify-center gap-3"
+    >
+      <ShieldCheck size={20} />
+      {enviando ? 'ENVIANDO...' : 'CONFIRMAR TITULARES'}
+    </button>
+  </div>
+</div>
+
+            
           {/* LISTA DE JUGADORES */}
           <div className="lg:col-span-4">
             <div className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-6 md:p-8">

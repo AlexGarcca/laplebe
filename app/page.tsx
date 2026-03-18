@@ -90,7 +90,7 @@ export default async function Home() {
                     </div>
                     <h3 className="text-sm font-black text-center uppercase tracking-widest text-white group-hover:text-[#fcc200] mb-2">{equipo.nombre}</h3>
                     <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
-                      Presi: {equipo.presidente?.split(',')[0]}
+                    {equipo.presidente?.split(',')[0]}
                     </p>
                   </div>
                 </Link>

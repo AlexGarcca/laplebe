@@ -35,31 +35,29 @@ export default function CalendarioPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans selection:bg-[#fcc200]/30">
       
-      {/* NAVBAR UNIFICADO (Ya incluye el menú de hamburguesa) */}
       <Navbar />
-
       <MatchTicker />
 
-      <main className="max-w-5xl mx-auto p-6 md:p-12 md:py-20">
+      <main className="max-w-4xl mx-auto p-4 md:p-12 md:py-20">
         <header className="mb-12 text-center">
           <FadeInUp>
-            <h1 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-6">
+            <h1 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-4">
               Calendario <span className="text-[#fcc200]">Plebe</span>
             </h1>
             <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em]">Temporada 2026 • Split 3</p>
           </FadeInUp>
         </header>
 
-        {/* SELECTOR DE JORNADAS RESPONSIVO */}
-        <div className="flex justify-start md:justify-center gap-2 mb-16 overflow-x-auto pb-6 scrollbar-hide px-2">
+        {/* SELECTOR DE JORNADAS */}
+        <div className="flex justify-start md:justify-center gap-2 mb-10 overflow-x-auto pb-6 scrollbar-hide px-2">
           {jornadas.map((j) => (
             <button
               key={j}
               onClick={() => setJornadaActual(j)}
-              className={`flex-none px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+              className={`flex-none w-12 h-12 rounded-xl text-[10px] font-black uppercase transition-all duration-300 flex items-center justify-center ${
                 jornadaActual === j 
-                ? 'bg-[#fcc200] text-black shadow-xl scale-110' 
-                : 'bg-[#141414] text-zinc-500 hover:text-white border border-white/5'
+                ? 'bg-[#fcc200] text-black shadow-lg shadow-[#fcc200]/20 scale-110' 
+                : 'bg-[#141414] text-zinc-500 border border-white/5 hover:border-white/20'
               }`}
             >
               J{j}
@@ -67,69 +65,83 @@ export default function CalendarioPage() {
           ))}
         </div>
 
-        {/* LISTA DE PARTIDOS */}
-        <div className="space-y-6">
+        {/* LISTA DE PARTIDOS REDISEÑADA */}
+        <div className="space-y-4">
           <AnimatePresence mode="wait">
             {loading ? (
               <motion.div 
                 key="loader"
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="text-center py-20 text-zinc-700 font-black uppercase tracking-[0.3em]"
+                className="text-center py-20 text-zinc-700 font-black uppercase tracking-[0.3em] text-xs"
               >
-                Sincronizando Jornada...
+                Sincronizando...
               </motion.div>
             ) : (
               <motion.div 
                 key={jornadaActual}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="grid gap-6"
+                className="grid gap-3"
               >
-                {partidos.map((partido) => (
-                  <div 
-                    key={partido.id}
-                    className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-[#fcc200]/20 transition-all group shadow-2xl"
-                  >
-                    {/* LOCAL */}
-                    <div className="flex flex-1 items-center justify-end gap-4 md:gap-6 text-right w-full md:w-auto order-2 md:order-1">
-                      <span className="text-sm md:text-xl font-black uppercase italic tracking-tighter group-hover:text-[#fcc200] transition-colors">
-                        {partido.local?.nombre}
-                      </span>
-                      <img src={partido.local?.escudo_url} className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg" alt="" />
-                    </div>
+                {partidos.map((partido) => {
+                  const localGana = partido.goles_local > partido.goles_visita;
+                  const visitaGana = partido.goles_visita > partido.goles_local;
 
-                    {/* SCORE / INFO */}
-                    <div className="flex flex-col items-center gap-1 order-1 md:order-2 px-6 py-3 bg-black/40 rounded-3xl border border-white/5 min-w-30">
-                      {partido.jugado ? (
-                        <div className="text-3xl md:text-5xl font-black italic tracking-tighter flex items-center gap-3">
-                          <span className={partido.goles_local > partido.goles_visita ? 'text-[#fcc200]' : 'text-white'}>{partido.goles_local}</span>
-                          <span className="text-zinc-800 text-xl">-</span>
-                          <span className={partido.goles_visita > partido.goles_local ? 'text-[#fcc200]' : 'text-white'}>{partido.goles_visita}</span>
+                  return (
+                    <div 
+                      key={partido.id}
+                      className="bg-[#141414] border border-white/5 rounded-3xl p-4 md:p-6 hover:border-[#fcc200]/30 transition-all group overflow-hidden"
+                    >
+                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:gap-6">
+                        
+                        {/* LOCAL */}
+                        <div className="flex items-center justify-end gap-2 md:gap-4 text-right">
+                          <span className={`text-[10px] md:text-lg font-black uppercase italic tracking-tighter transition-colors leading-tight ${localGana ? 'text-white' : 'text-zinc-500'}`}>
+                            {partido.local?.nombre}
+                          </span>
+                          <div className={`relative ${localGana ? 'scale-110' : 'opacity-50 scale-90'} transition-all`}>
+                            <img src={partido.local?.escudo_url} className="w-10 h-10 md:w-16 md:h-16 object-contain" alt="" />
+                            {localGana && <div className="absolute -inset-1 bg-[#fcc200]/20 blur-xl rounded-full -z-10" />}
+                          </div>
                         </div>
-                      ) : (
-                        <div className="text-[10px] md:text-xs font-black uppercase tracking-widest text-[#fcc200]">
-                          {partido.fecha ? new Date(partido.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD'}
-                        </div>
-                      )}
-                      <span className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">Estadio Plebe</span>
-                    </div>
 
-                    {/* VISITA */}
-                    <div className="flex flex-1 items-center justify-start gap-4 md:gap-6 w-full md:w-auto order-3">
-                      <img src={partido.visita?.escudo_url} className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg" alt="" />
-                      <span className="text-sm md:text-xl font-black uppercase italic tracking-tighter group-hover:text-[#fcc200] transition-colors">
-                        {partido.visita?.nombre}
-                      </span>
+                        {/* SCORE / TIEMPO */}
+                        <div className="flex flex-col items-center justify-center min-w-17.5 md:min-w-30 px-2 py-2 bg-black/40 rounded-2xl border border-white/5">
+                          {partido.jugado ? (
+                            <div className="flex items-center gap-1 md:gap-3 text-xl md:text-4xl font-black italic tracking-tighter">
+                              <span className={localGana ? 'text-[#fcc200]' : 'text-white'}>{partido.goles_local}</span>
+                              <span className="text-zinc-800 text-sm md:text-2xl">-</span>
+                              <span className={visitaGana ? 'text-[#fcc200]' : 'text-white'}>{partido.goles_visita}</span>
+                            </div>
+                          ) : (
+                            <span className="text-[9px] md:text-xs font-black text-[#fcc200] uppercase tracking-widest">
+                              {partido.fecha ? new Date(partido.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD'}
+                            </span>
+                          )}
+                          <span className="text-[6px] md:text-[8px] font-bold text-zinc-600 uppercase tracking-[0.2em] mt-1 text-center">ESTADIO PLEBE</span>
+                        </div>
+
+                        {/* VISITA */}
+                        <div className="flex items-center justify-start gap-2 md:gap-4 text-left">
+                          <div className={`relative ${visitaGana ? 'scale-110' : 'opacity-50 scale-90'} transition-all`}>
+                            <img src={partido.visita?.escudo_url} className="w-10 h-10 md:w-16 md:h-16 object-contain" alt="" />
+                            {visitaGana && <div className="absolute -inset-1 bg-[#fcc200]/20 blur-xl rounded-full -z-10" />}
+                          </div>
+                          <span className={`text-[10px] md:text-lg font-black uppercase italic tracking-tighter transition-colors leading-tight ${visitaGana ? 'text-white' : 'text-zinc-500'}`}>
+                            {partido.visita?.nombre}
+                          </span>
+                        </div>
+
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </main>
 
-      {/* Estilo para ocultar scrollbar en el selector de jornadas */}
       <style jsx>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
