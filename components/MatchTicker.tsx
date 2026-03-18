@@ -70,7 +70,7 @@ export default function MatchTicker() {
           {partidos.map((partido) => (
             <div 
               key={partido.id} 
-              className={`min-w-[300px] bg-[#141414] border rounded-[2.5rem] p-6 shadow-2xl pointer-events-none transition-colors ${
+              className={`min-w-75 bg-[#141414] border rounded-[2.5rem] p-6 shadow-2xl pointer-events-none transition-colors ${
                 partido.jugado ? 'border-white/5 opacity-70' : 'border-[#fcc200]/30'
               }`}
             >

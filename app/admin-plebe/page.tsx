@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShieldCheck, UserPlus, Trophy, CheckCircle2, XCircle, RefreshCw } from 'lucide-react'
+import { ShieldCheck, UserPlus, Trophy, CheckCircle2, XCircle, RefreshCw, Trash2 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import { useRouter } from 'next/navigation'
 
@@ -14,10 +14,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     const validateAndFetch = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const { data: { user } } = await supabase.auth.getUser()
 
+      // VALIDACIÓN DE ADMIN
       if (user?.email !== 'garcca29@gmail.com') {
         router.push('/')
         return
@@ -31,13 +30,11 @@ export default function AdminPage() {
 
   const fetchAdminData = async () => {
     setLoading(true)
-    // 1. Traer perfiles (especialmente los no aprobados primero)
     const { data: pData } = await supabase
       .from('perfiles_presidentes')
       .select('*, equipos(nombre, escudo_url)')
       .order('aprobado', { ascending: true })
 
-    // 2. Traer lista de equipos para el selector
     const { data: eData } = await supabase.from('equipos').select('*').order('nombre')
 
     if (pData) setPendientes(pData)
@@ -52,7 +49,21 @@ export default function AdminPage() {
       .eq('id', id)
 
     if (error) alert("Error al actualizar: " + error.message)
-    else fetchAdminData() // Refrescar lista
+    else fetchAdminData()
+  }
+
+  const handleDelete = async (id: string, nombre: string) => {
+    const confirmar = confirm(`¿Estás seguro de que quieres eliminar a "${nombre}"? Esta acción borrará su perfil de la base de datos.`);
+    
+    if (confirmar) {
+      const { error } = await supabase
+        .from('perfiles_presidentes')
+        .delete()
+        .eq('id', id);
+
+      if (error) alert("Error al eliminar: " + error.message);
+      else fetchAdminData(); 
+    }
   }
 
   return (
@@ -86,7 +97,6 @@ export default function AdminPage() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className={`bg-[#141414] border ${presi.aprobado ? 'border-white/5' : 'border-[#fcc200]/30 shadow-[0_0_20px_rgba(252,194,0,0.05)]'} rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 transition-all`}
               >
-                {/* INFO DEL SOLICITANTE */}
                 <div className="flex items-center gap-6 flex-1">
                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${presi.aprobado ? 'bg-zinc-900 text-zinc-600' : 'bg-[#fcc200]/10 text-[#fcc200]'}`}>
                     <UserPlus size={24} />
@@ -108,11 +118,9 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* ACCIONES DE ADMIN */}
                 <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-                  {/* SELECTOR DE EQUIPO */}
                   <select 
-                    className="bg-black border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-[#fcc200] transition-all flex-1 md:flex-none min-w-45"
+                    className="bg-black border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-[#fcc200] transition-all flex-1 md:flex-none min-w-50"
                     value={presi.equipo_id || ""}
                     onChange={(e) => handleUpdate(presi.id, e.target.value, presi.aprobado)}
                   >
@@ -122,24 +130,35 @@ export default function AdminPage() {
                     ))}
                   </select>
 
-                  {/* BOTÓN DE APROBACIÓN */}
-                  <button
-                    onClick={() => handleUpdate(presi.id, presi.equipo_id, !presi.aprobado)}
-                    disabled={!presi.equipo_id}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex-1 md:flex-none justify-center ${
-                      presi.aprobado 
-                      ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20' 
-                      : 'bg-[#fcc200] text-black hover:scale-105 disabled:opacity-20'
-                    }`}
-                  >
-                    {presi.aprobado ? <><XCircle size={14}/> REVOCAR</> : <><CheckCircle2 size={14}/> APROBAR</>}
-                  </button>
+                  <div className="flex items-center gap-2 w-full md:w-auto">
+                    {/* BOTÓN ELIMINAR / RECHAZAR */}
+                    <button
+                      onClick={() => handleDelete(presi.id, presi.nombre_presidente)}
+                      className="p-3 bg-rose-500/10 text-rose-500 rounded-xl hover:bg-rose-500/20 transition-all border border-rose-500/20"
+                      title="Eliminar Registro"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+
+                    {/* BOTÓN APROBAR / REVOCAR */}
+                    <button
+                      onClick={() => handleUpdate(presi.id, presi.equipo_id, !presi.aprobado)}
+                      disabled={!presi.equipo_id}
+                      className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex-1 md:flex-none justify-center ${
+                        presi.aprobado 
+                        ? 'bg-zinc-800 text-zinc-400 hover:text-rose-500' 
+                        : 'bg-[#fcc200] text-black hover:scale-105 disabled:opacity-20 shadow-lg shadow-[#fcc200]/10'
+                      }`}
+                    >
+                      {presi.aprobado ? <><XCircle size={14}/> REVOCAR</> : <><CheckCircle2 size={14}/> APROBAR</>}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
 
-          {pendientes.length === 0 && (
+          {pendientes.length === 0 && !loading && (
             <div className="text-center py-20 bg-[#141414] rounded-[3rem] border border-white/5">
               <ShieldCheck size={48} className="mx-auto text-zinc-800 mb-4" />
               <p className="text-zinc-600 font-black uppercase tracking-[0.3em] text-xs">No hay solicitudes de acceso</p>

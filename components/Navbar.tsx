@@ -1,11 +1,17 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Settings, LayoutDashboard, LogOut } from 'lucide-react'
+import { useAuth } from '../app/context/AuthContext'
+import { supabase } from '../app/lib/supabase'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [perfil, setPerfil] = useState<any>(null)
+  const { user, loading } = useAuth()
+  const router = useRouter()
   
   const links = [
     { name: 'Calendario', href: '/partidos' },
@@ -13,10 +19,35 @@ export default function Navbar() {
     { name: 'Estadísticas', href: '/estadisticas' },
   ]
 
+  const isAdmin = user?.email === 'garcca29@gmail.com'
+
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('perfiles_presidentes')
+          .select('*, equipos(*)')
+          .eq('id', user.id)
+          .single()
+        if (data) setPerfil(data)
+      } else {
+        setPerfil(null)
+      }
+    }
+    fetchPerfil()
+  }, [user])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+    setIsOpen(false)
+  }
+
   return (
     <nav className="backdrop-blur-2xl bg-black/80 border-b border-white/5 sticky top-0 z-100 px-6 md:px-8 py-5 flex items-center justify-between">
-      {/* LOGO */}
-      <Link href="/" className="flex items-center gap-4 group">
+      
+      {/* LOGO LIGA */}
+      <Link href="/" className="flex items-center gap-4 group cursor-pointer">
         <div className="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-110">
           <img src="/LOGO_PNG.png" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(252,194,0,0.3)]" alt="Logo" />
         </div>
@@ -28,17 +59,52 @@ export default function Navbar() {
       {/* DESKTOP NAV */}
       <div className="hidden md:flex gap-10 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 items-center">
         {links.map((link) => (
-          <Link key={link.href} href={link.href} className="hover:text-[#fcc200] transition-colors">
+          <Link key={link.href} href={link.href} className="hover:text-[#fcc200] transition-colors cursor-pointer">
             {link.name}
           </Link>
         ))}
-        <Link href="/login" className="ml-6 px-6 py-2.5 bg-[#fcc200] text-black rounded-full hover:scale-105 transition-all shadow-[0_0_20px_rgba(252,194,0,0.2)]">
-          Portal Presis
-        </Link>
+
+        <div className="flex items-center gap-4 ml-6">
+          {isAdmin && (
+            <Link 
+              href="/admin-plebe" 
+              className="p-2 text-zinc-700 hover:text-[#fcc200] transition-all hover:rotate-90 duration-500 cursor-pointer"
+            >
+              <Settings size={18} />
+            </Link>
+          )}
+
+          {!loading && (
+            user && perfil?.equipos ? (
+              <div className="flex items-center gap-4 pl-4 border-l border-white/10">
+                <Link href="/vestidor" className="flex items-center gap-3 group cursor-pointer">
+                  <div className="text-right hidden lg:block">
+                    <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Tu Vestidor</p>
+                    <p className="text-[10px] font-black text-white uppercase italic group-hover:text-[#fcc200] transition-colors">{perfil.equipos.nombre}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 p-1.5 group-hover:border-[#fcc200]/50 transition-all">
+                    <img src={perfil.equipos.escudo_url} className="w-full h-full object-contain" alt="Escudo" />
+                  </div>
+                </Link>
+                {/* BOTÓN SALIR DESKTOP */}
+                <button 
+                  onClick={handleLogout}
+                  className="p-2 text-rose-500/50 hover:text-rose-500 transition-colors cursor-pointer hover:scale-110 active:scale-90"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
+            ) : (
+              <Link href="/login" className="px-6 py-2.5 bg-[#fcc200] text-black rounded-full font-black uppercase italic text-[10px] tracking-widest hover:scale-105 transition-all cursor-pointer">
+                Portal Presis
+              </Link>
+            )
+          )}
+        </div>
       </div>
 
       {/* MOBILE BURGER */}
-      <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-[#fcc200]">
+      <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-[#fcc200] cursor-pointer">
         {isOpen ? <X size={28} /> : <Menu size={28} />}
       </button>
 
@@ -52,22 +118,32 @@ export default function Navbar() {
             className="absolute top-full left-0 w-full bg-black/95 backdrop-blur-3xl border-b border-white/5 p-8 flex flex-col gap-6 md:hidden"
           >
             {links.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href} 
-                onClick={() => setIsOpen(false)}
-                className="text-2xl font-black uppercase italic text-white hover:text-[#fcc200] transition-colors"
-              >
+              <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className="text-2xl font-black uppercase italic text-white cursor-pointer">
                 {link.name}
               </Link>
             ))}
-            <Link 
-              href="/login" 
-              onClick={() => setIsOpen(false)}
-              className="mt-4 py-4 bg-[#fcc200] text-black text-center font-black uppercase italic rounded-2xl text-lg"
-            >
-              Portal Presis
-            </Link>
+
+            {user && perfil?.equipos ? (
+              <>
+                <Link href="/vestidor" onClick={() => setIsOpen(false)} className="mt-4 p-6 bg-white/5 border border-white/10 rounded-4xl flex items-center justify-between cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <img src={perfil.equipos.escudo_url} className="w-12 h-12 object-contain" alt="" />
+                    <p className="text-xl font-black text-white uppercase italic">{perfil.equipos.nombre}</p>
+                  </div>
+                  <LayoutDashboard className="text-[#fcc200]" size={24} />
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full py-4 border border-rose-500/20 text-rose-500 font-black uppercase italic rounded-2xl flex items-center justify-center gap-3 cursor-pointer"
+                >
+                  <LogOut size={20} /> Cerrar Sesión
+                </button>
+              </>
+            ) : (
+              <Link href="/login" onClick={() => setIsOpen(false)} className="mt-4 py-4 bg-[#fcc200] text-black text-center font-black uppercase italic rounded-2xl text-lg cursor-pointer">
+                Portal Presis
+              </Link>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
