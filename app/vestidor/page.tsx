@@ -168,7 +168,7 @@ export default function VestidorPage() {
       <div className="relative z-10 flex justify-center w-full">
         <div className="w-[25%] max-w-32.5 group">
           <div className="relative aspect-square bg-[#fcc200]/5 rounded-xl border-2 border-[#fcc200]/20 group-hover:border-[#fcc200] transition-all flex flex-col items-center justify-center backdrop-blur-md">
-            <span className="text-[7px] font-black text-[#fcc200] absolute top-1.5 tracking-tighter uppercase">PORTERO</span>
+            <span className="text-[7px] font-black text-[#fcc200] absolute top-1.5 tracking-tighter uppercase"></span>
             
             <select 
               className="w-full h-full bg-transparent text-[9px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none text-[#fcc200] z-10 pt-2 px-1"
