@@ -1,25 +1,43 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase' 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation' // Agregamos useSearchParams
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '@/components/Navbar'
+import { AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null) // Para mensajes elegantes
+  
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // ESCUCHAR ERRORES DESDE LA URL (Si el vestidor lo expulsó)
+  useEffect(() => {
+    const errorType = searchParams.get('error')
+    if (errorType === 'account_deleted') {
+      setErrorMsg('ACCESO DENEGADO: Tu perfil no existe o fue revocado por la liga.')
+    }
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setErrorMsg(null)
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      alert('Error: ' + error.message)
+      // Traducimos el error de Supabase a algo más "Plebe"
+      const mensaje = error.message === 'Invalid login credentials' 
+        ? 'Credenciales incorrectas. Revisa tu código secreto.' 
+        : error.message
+      
+      setErrorMsg(mensaje)
       setLoading(false)
     } else {
       router.push('/vestidor')
@@ -28,21 +46,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans relative overflow-hidden selection:bg-[#fcc200]/30">
-      
       <Navbar />
 
-      {/* DECORACIÓN DE FONDO */}
       <div className="absolute top-[10%] left-[-10%] w-[80%] md:w-[50%] h-[50%] bg-[#fcc200]/5 rounded-full blur-[100px] md:blur-[140px] pointer-events-none" />
       <div className="absolute bottom-[10%] right-[-10%] w-[80%] md:w-[50%] h-[50%] bg-[#fcc200]/5 rounded-full blur-[100px] md:blur-[140px] pointer-events-none" />
 
       <div className="flex flex-col items-center justify-center py-12 md:py-20 px-4 relative z-10">
-        
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full"
         >
-          {/* CARD DE LOGIN */}
           <div className="bg-[#141414]/80 border border-white/5 p-8 md:p-14 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl backdrop-blur-xl">
             <div className="text-center mb-10 md:mb-12">
               <div className="flex justify-center mb-6 md:mb-8">
@@ -53,6 +67,21 @@ export default function LoginPage() {
               </h1>
               <p className="text-zinc-600 text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] mt-4 italic">System Access Protocol</p>
             </div>
+
+            {/* MENSAJE DE ERROR DINÁMICO */}
+            <AnimatePresence>
+              {errorMsg && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-500"
+                >
+                  <AlertCircle size={18} />
+                  <p className="text-[10px] font-black uppercase tracking-widest leading-tight">{errorMsg}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <form onSubmit={handleLogin} className="space-y-6 md:space-y-8">
               <div className="space-y-3">
@@ -70,7 +99,6 @@ export default function LoginPage() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center px-2">
                   <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Código Secreto</label>
-                  {/* ENLACE PARA RECUPERAR CONTRASEÑA */}
                   <Link href="/reset-password" title="recuperar" className="text-[8px] font-bold text-zinc-700 hover:text-[#fcc200] transition-colors uppercase tracking-widest">
                     ¿Olvidaste el acceso?
                   </Link>
@@ -89,17 +117,16 @@ export default function LoginPage() {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#fcc200] text-black font-black uppercase italic tracking-[0.2em] py-4 md:py-5 rounded-2xl hover:bg-[#fbd34d] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_15px_40px_rgba(252,194,0,0.15)]"
+                  className="w-full bg-[#fcc200] text-black font-black uppercase italic tracking-[0.2em] py-4 md:py-5 rounded-2xl hover:bg-[#fbd34d] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_15px_40px_rgba(252,194,0,0.15)] cursor-pointer"
                 >
                   {loading ? 'AUTENTICANDO...' : 'INICIAR SESIÓN'}
                 </button>
 
-                {/* BOTÓN PARA CREAR CUENTA / SIGN UP */}
                 <div className="mt-8 text-center">
                   <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-widest mb-3">¿Eres un nuevo presidente?</p>
                   <Link 
                     href="/signup"
-                    className="inline-block w-full py-4 md:py-5 border border-white/10 rounded-2xl text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/5 hover:border-white/20 transition-all"
+                    className="inline-block w-full py-4 md:py-5 border border-white/10 rounded-2xl text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/5 hover:border-white/20 transition-all cursor-pointer"
                   >
                     Crear mi acceso oficial
                   </Link>
