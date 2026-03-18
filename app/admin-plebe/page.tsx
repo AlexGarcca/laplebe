@@ -43,10 +43,26 @@ export default function AdminPage() {
     setLoading(false)
   }
 
-  const handleUpdate = async (id: string, equipoId: string, aprobado: boolean) => {
+  const handleUpdate = async (
+    id: string,
+    equipoId: string,
+    aprobado: boolean,
+    aprobadoActual: boolean,
+    saldoActual: number | null
+  ) => {
+    const updatePayload: { equipo_id: string; aprobado: boolean; saldo_bet?: number } = {
+      equipo_id: equipoId,
+      aprobado,
+    }
+
+    // Al aprobar por primera vez (o sin saldo), otorgamos crédito inicial para casino.
+    if (!aprobadoActual && aprobado && (!saldoActual || saldoActual <= 0)) {
+      updatePayload.saldo_bet = 500
+    }
+
     const { error } = await supabase
       .from('perfiles_presidentes')
-      .update({ equipo_id: equipoId, aprobado: aprobado })
+      .update(updatePayload)
       .eq('id', id)
 
     if (error) alert("Error al actualizar: " + error.message)
@@ -164,7 +180,7 @@ export default function AdminPage() {
                     <select 
                       className="bg-black border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-[#fcc200] transition-all flex-1 md:flex-none min-w-50 cursor-pointer"
                       value={presi.equipo_id || ""}
-                      onChange={(e) => handleUpdate(presi.id, e.target.value, presi.aprobado)}
+                      onChange={(e) => handleUpdate(presi.id, e.target.value, presi.aprobado, presi.aprobado, presi.saldo_bet ?? null)}
                     >
                       <option value="">ASIGNAR EQUIPO...</option>
                       {equipos.map(e => (
@@ -182,7 +198,7 @@ export default function AdminPage() {
                       </button>
 
                       <button
-                        onClick={() => handleUpdate(presi.id, presi.equipo_id, !presi.aprobado)}
+                        onClick={() => handleUpdate(presi.id, presi.equipo_id, !presi.aprobado, presi.aprobado, presi.saldo_bet ?? null)}
                         disabled={!presi.equipo_id}
                         className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex-1 md:flex-none justify-center cursor-pointer ${
                           presi.aprobado 
