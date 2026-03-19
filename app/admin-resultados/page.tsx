@@ -9,6 +9,7 @@ export default function AdminResultadosPage() {
   const [partidos, setPartidos] = useState<any[]>([])
   const [jornadas, setJornadas] = useState<number[]>([])
   const [jornadaSeleccionada, setJornadaSeleccionada] = useState<number>(1)
+  const [mostrarJugados, setMostrarJugados] = useState(false)
   
   const [partidoSeleccionado, setPartidoSeleccionado] = useState<any>(null)
   const [jugadoresLocal, setJugadoresLocal] = useState<any[]>([])
@@ -42,7 +43,6 @@ export default function AdminResultadosPage() {
     const { data } = await supabase
       .from('partidos')
       .select('*, local:equipo_local_id(id, nombre, escudo_url), visita:equipo_visita_id(id, nombre, escudo_url)')
-      .eq('jugado', false)
       .order('jornada', { ascending: true })
     
     if (data && data.length > 0) {
@@ -59,10 +59,10 @@ export default function AdminResultadosPage() {
 
   const seleccionarPartido = async (p: any) => {
     setPartidoSeleccionado(p)
-    setGolesLocal(0)
-    setGolesVisita(0)
-    setGolesShootoutLocal(0)
-    setGolesShootoutVisita(0)
+    setGolesLocal(p.goles_local ?? 0)
+    setGolesVisita(p.goles_visita ?? 0)
+    setGolesShootoutLocal(p.goles_shootout_local ?? 0)
+    setGolesShootoutVisita(p.goles_shootout_visita ?? 0)
     setStats({})
 
     const { data: jLocal } = await supabase.from('jugadores').select('*').eq('id_equipo', p.local.id).order('nombre')
@@ -79,6 +79,25 @@ export default function AdminResultadosPage() {
 
     setPorteroLocalId(gkLocalDefault)
     setPorteroVisitaId(gkVisitaDefault)
+
+    const { data: statsExistentes } = await supabase
+      .from('estadisticas_jugadores')
+      .select('jugador_id, goles, asistencias, amarillas, azules, calificacion')
+      .eq('partido_id', p.id)
+
+    if (statsExistentes && statsExistentes.length > 0) {
+      const statsMap = statsExistentes.reduce((acc: Record<string, any>, item: any) => {
+        acc[item.jugador_id] = {
+          goles: item.goles || 0,
+          asistencias: item.asistencias || 0,
+          amarillas: item.amarillas || 0,
+          azules: item.azules || 0,
+          calificacion: item.calificacion || 0,
+        }
+        return acc
+      }, {})
+      setStats(statsMap)
+    }
   }
 
   const handleStatChange = (jugadorId: string, campo: string, valor: string) => {
@@ -86,25 +105,37 @@ export default function AdminResultadosPage() {
   }
 
   const handleGuardar = async () => {
+    const esEdicionPartidoJugado = partidoSeleccionado?.jugado === true
+
     if (golesLocal === golesVisita && golesShootoutLocal === golesShootoutVisita) {
       alert('⚠️ Empate en regular. ¡Define los Shootouts!')
       return
     }
-    if (!confirm('¿Cerrar partido? Se aplicarán Goles, Apuestas y SANCIONES automáticamente.')) return
+    if (!confirm(esEdicionPartidoJugado
+      ? '¿Guardar cambios del partido? Se actualizarán estadísticas sin duplicar datos.'
+      : '¿Cerrar partido? Se aplicarán Goles, Apuestas y SANCIONES automáticamente.'
+    )) return
     
     setGuardando(true)
 
     try {
       // 1. GUARDAR MARCADOR
-      await supabase.from('partidos').update({
+      const { data: partidoActualizado, error: partidoError } = await supabase.from('partidos').update({
         jugado: true,
         goles_local: golesLocal,
         goles_visita: golesVisita,
         goles_shootout_local: golesLocal === golesVisita ? golesShootoutLocal : 0,
         goles_shootout_visita: golesLocal === golesVisita ? golesShootoutVisita : 0
-      }).eq('id', partidoSeleccionado.id)
+      }).eq('id', partidoSeleccionado.id).select('id')
+
+      if (partidoError) throw partidoError
+      if (!partidoActualizado || partidoActualizado.length === 0) {
+        throw new Error('No se pudo marcar el partido como jugado. Revisa permisos en Supabase (RLS).')
+      }
 
       // 2. PROCESAR ESTADÍSTICAS Y SANCIONES (TRIBUNAL)
+      // En ediciones de partidos ya cerrados solo se reemplazan stats para evitar duplicados.
+      const aplicarProcesosDeCierre = !esEdicionPartidoJugado
       const todasLasStats: any[] = []
       const todosLosJugadores = [...jugadoresLocal, ...jugadoresVisita]
 
@@ -131,58 +162,75 @@ export default function AdminResultadosPage() {
             goles_recibidos: recibidos
           })
 
-          // --- LÓGICA DE SANCIONES ---
-          let acumAmarillas = (j.amarillas_acumuladas || 0) + amarillasHoy
-          let suspension = j.partidos_suspension || 0
+          if (aplicarProcesosDeCierre) {
+            // --- LÓGICA DE SANCIONES ---
+            let acumAmarillas = (j.amarillas_acumuladas || 0) + amarillasHoy
+            let suspension = j.partidos_suspension || 0
 
-          // Regla: Azul o Doble Amarilla = +1 partido
-          if (azulesHoy > 0 || amarillasHoy >= 2) {
-            suspension += 1
+            // Regla: Azul o Doble Amarilla = +1 partido
+            if (azulesHoy > 0 || amarillasHoy >= 2) {
+              suspension += 1
+            }
+
+            // Regla: Acumulación de 3 amarillas = +1 partido y reset
+            if (acumAmarillas >= 3) {
+              suspension += 1
+              acumAmarillas = 0
+            }
+
+            // Actualizamos al jugador con su nuevo estado disciplinario
+            const { error: jugadorUpdateError } = await supabase.from('jugadores').update({
+              amarillas_acumuladas: acumAmarillas,
+              partidos_suspension: suspension
+            }).eq('id', j.id)
+
+            if (jugadorUpdateError) throw jugadorUpdateError
           }
-
-          // Regla: Acumulación de 3 amarillas = +1 partido y reset
-          if (acumAmarillas >= 3) {
-            suspension += 1
-            acumAmarillas = 0
-          }
-
-          // Actualizamos al jugador con su nuevo estado disciplinario
-          await supabase.from('jugadores').update({
-            amarillas_acumuladas: acumAmarillas,
-            partidos_suspension: suspension
-          }).eq('id', j.id)
         } else {
           // Si NO jugó (no tiene stats) pero tenía una suspensión pendiente, le descontamos un partido
-          if (j.partidos_suspension > 0) {
-            await supabase.from('jugadores').update({
+          if (aplicarProcesosDeCierre && j.partidos_suspension > 0) {
+            const { error: jugadorDescuentoError } = await supabase.from('jugadores').update({
               partidos_suspension: j.partidos_suspension - 1
             }).eq('id', j.id)
+
+            if (jugadorDescuentoError) throw jugadorDescuentoError
           }
         }
       }
+
+      const { error: borrarStatsError } = await supabase
+        .from('estadisticas_jugadores')
+        .delete()
+        .eq('partido_id', partidoSeleccionado.id)
+
+      if (borrarStatsError) throw borrarStatsError
 
       if (todasLasStats.length > 0) {
-        await supabase.from('estadisticas_jugadores').insert(todasLasStats)
+        const { error: statsError } = await supabase.from('estadisticas_jugadores').insert(todasLasStats)
+        if (statsError) throw statsError
       }
 
-      // 3. MOTOR DE APUESTAS (Simplificado para el ejemplo)
-      let resultadoReal = 'EMPATE'
-      if (golesLocal > golesVisita) resultadoReal = 'LOCAL'
-      else if (golesVisita > golesLocal) resultadoReal = 'VISITA'
+      if (aplicarProcesosDeCierre) {
+        // 3. MOTOR DE APUESTAS (solo al cerrar por primera vez)
+        // Se delega a RPC atómica para pagar simples/parlays y registrar ledger.
+        let resultadoReal = 'EMPATE'
+        if (golesLocal > golesVisita) resultadoReal = 'LOCAL'
+        else if (golesVisita > golesLocal) resultadoReal = 'VISITA'
 
-      const { data: apuestas } = await supabase.from('apuestas').select('*').eq('partido_id', partidoSeleccionado.id).eq('estado', 'pendiente')
-      if (apuestas) {
-        for (const apuesta of apuestas) {
-          const gano = apuesta.seleccion === resultadoReal
-          await supabase.from('apuestas').update({ estado: gano ? 'ganada' : 'perdida' }).eq('id', apuesta.id)
-          if (gano && !apuesta.es_parlay) {
-            const { data: p } = await supabase.from('perfiles_presidentes').select('saldo_bet').eq('id', apuesta.user_id).single()
-            if (p) await supabase.from('perfiles_presidentes').update({ saldo_bet: p.saldo_bet + (apuesta.monto * apuesta.momio) }).eq('id', apuesta.user_id)
-          }
+        const { error: settleError } = await supabase.rpc('settle_match_bets', {
+          p_partido_id: partidoSeleccionado.id,
+          p_resultado_real: resultadoReal
+        })
+
+        if (settleError) {
+          throw settleError
         }
       }
 
-      alert('¡Partido procesado y sanciones aplicadas! ⚖️')
+      alert(aplicarProcesosDeCierre
+        ? '¡Partido procesado y sanciones aplicadas! ⚖️'
+        : '¡Estadísticas actualizadas sin duplicar registros! ✅'
+      )
       setPartidoSeleccionado(null)
       fetchPartidosPendientes()
 
@@ -192,7 +240,9 @@ export default function AdminResultadosPage() {
     setGuardando(false)
   }
 
-  const partidosFiltrados = partidos.filter(p => p.jornada === jornadaSeleccionada)
+  const partidosFiltrados = partidos.filter(
+    p => p.jornada === jornadaSeleccionada && (mostrarJugados ? p.jugado : !p.jugado)
+  )
 
   if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-[#fcc200]"><Loader2 className="animate-spin" size={40} /></div>
 
@@ -226,12 +276,44 @@ export default function AdminResultadosPage() {
               ))}
             </div>
 
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setMostrarJugados(false)}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer border transition-colors ${
+                  !mostrarJugados
+                    ? 'bg-[#fcc200] text-black border-[#fcc200]'
+                    : 'bg-[#141414] text-zinc-500 border-white/10 hover:text-white'
+                }`}
+              >
+                Pendientes
+              </button>
+              <button
+                onClick={() => setMostrarJugados(true)}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer border transition-colors ${
+                  mostrarJugados
+                    ? 'bg-cyan-500 text-black border-cyan-500'
+                    : 'bg-[#141414] text-zinc-500 border-white/10 hover:text-white'
+                }`}
+              >
+                Jugados (Editar Stats)
+              </button>
+            </div>
+
+            {partidosFiltrados.length === 0 && (
+              <div className="bg-[#141414] border border-white/5 rounded-3xl p-8 text-center text-zinc-500 font-black uppercase tracking-[0.2em] text-xs">
+                No hay partidos en este filtro.
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {partidosFiltrados.map(p => (
                 <div key={p.id} onClick={() => seleccionarPartido(p)} className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-6 hover:border-[#fcc200]/30 transition-all cursor-pointer group shadow-xl flex flex-col items-center">
+                  <span className={`text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1 rounded-full border mb-4 ${p.jugado ? 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10' : 'text-[#fcc200] border-[#fcc200]/30 bg-[#fcc200]/10'}`}>
+                    {p.jugado ? 'Jugado' : 'Pendiente'}
+                  </span>
                   <div className="flex items-center justify-between w-full gap-4 mt-2">
                     <div className="text-center w-1/3"><img src={p.local.escudo_url} className="w-14 h-14 mx-auto mb-3 drop-shadow-lg group-hover:scale-110 transition-transform" alt="" /><p className="text-[9px] font-black uppercase text-zinc-400 truncate">{p.local.nombre}</p></div>
-                    <span className="text-xl font-black italic text-zinc-700">VS</span>
+                    <span className="text-xl font-black italic text-zinc-700">{p.jugado ? `${p.goles_local ?? 0} - ${p.goles_visita ?? 0}` : 'VS'}</span>
                     <div className="text-center w-1/3"><img src={p.visita.escudo_url} className="w-14 h-14 mx-auto mb-3 drop-shadow-lg group-hover:scale-110 transition-transform" alt="" /><p className="text-[9px] font-black uppercase text-zinc-400 truncate">{p.visita.nombre}</p></div>
                   </div>
                   <div className="w-full mt-6 flex justify-center"><ChevronRight size={20} className="text-zinc-600 group-hover:text-[#fcc200] group-hover:translate-x-1 transition-transform" /></div>
