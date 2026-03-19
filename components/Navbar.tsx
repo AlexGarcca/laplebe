@@ -56,20 +56,21 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="backdrop-blur-2xl bg-black/80 border-b border-white/5 sticky top-0 z-100 px-4 sm:px-6 md:px-8 py-4 md:py-5 flex items-center justify-between">
+    <nav className="backdrop-blur-2xl bg-black/80 border-b border-white/5 sticky top-0 z-100 px-4 sm:px-6 md:px-7 lg:px-8 py-4 md:py-4.5 flex items-center justify-between">
       
       {/* LOGO LIGA */}
-      <Link href="/" className="flex items-center gap-2 sm:gap-4 group cursor-pointer min-w-0">
-        <motion.div layoutId="shared-league-logo" className="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-110">
+      <Link href="/" className="flex items-center gap-2 sm:gap-3 group cursor-pointer min-w-0 shrink-0">
+        <motion.div layoutId="shared-league-logo" className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center transition-transform group-hover:scale-110">
           <img src="/LOGO_PNG.png" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(252,194,0,0.3)]" alt="Logo" />
         </motion.div>
-        <motion.div layoutId="shared-league-wordmark" className="text-base sm:text-xl md:text-2xl font-black italic tracking-tighter text-white uppercase group-hover:text-[#fcc200] transition-colors truncate">
-          Plebeians <span className="text-[#fcc200]">League</span>
+        <motion.div layoutId="shared-league-wordmark" className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-black italic tracking-tight text-white uppercase group-hover:text-[#fcc200] transition-colors whitespace-nowrap">
+          Plebeians <span className="text-[#fcc200] hidden sm:inline">League</span>
+          <span className="text-[#fcc200] sm:hidden">Lg</span>
         </motion.div>
       </Link>
 
       {/* DESKTOP NAV */}
-      <div className="hidden md:flex gap-8 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 items-center">
+      <div className="hidden md:flex gap-6 lg:gap-7 text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500 items-center min-w-0">
         {links.map((link) => (
           <Link 
             key={link.href} 
