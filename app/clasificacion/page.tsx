@@ -129,7 +129,9 @@ export default function ClasificacionPage() {
                 {tabla.map((equipo, index) => {
                   const isLider = index === 0;
                   const isLiguilla = index >= 1 && index <= 7;
-                  const isDescenso = index >= tabla.length - 2;
+                  const riskStartIndex = Math.max(tabla.length - 4, 0);
+                  const isZonaRiesgo = index >= riskStartIndex;
+                  const isRiesgoMaximo = index >= tabla.length - 2;
 
                   return (
                     <motion.tr 
@@ -140,7 +142,7 @@ export default function ClasificacionPage() {
                       className="group hover:bg-white/5 transition-all cursor-default"
                     >
                       <td className="py-4 text-center">
-                        <div className={`w-8 h-8 mx-auto flex items-center justify-center rounded-xl font-black italic text-sm md:text-base border ${isLider ? 'bg-[#fcc200]/10 border-[#fcc200] text-[#fcc200]' : isLiguilla ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-500' : isDescenso ? 'bg-rose-500/10 border-rose-500/50 text-rose-500' : 'bg-transparent border-transparent text-zinc-600'}`}>
+                        <div className={`w-8 h-8 mx-auto flex items-center justify-center rounded-xl font-black italic text-sm md:text-base border ${isLider ? 'bg-[#fcc200]/10 border-[#fcc200] text-[#fcc200]' : isLiguilla ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-500' : isZonaRiesgo ? 'bg-rose-500/10 border-rose-500/50 text-rose-500' : 'bg-transparent border-transparent text-zinc-600'}`}>
                           {index + 1}
                         </div>
                       </td>
@@ -152,7 +154,11 @@ export default function ClasificacionPage() {
                             <span className="text-xs md:text-sm font-black uppercase tracking-tight text-white group-hover:text-[#fcc200] transition-colors">{equipo.nombre}</span>
                             {isLider && <span className="text-[7px] font-black uppercase text-[#fcc200] tracking-widest">Súper Líder</span>}
                             {isLiguilla && <span className="text-[7px] font-black uppercase text-cyan-500/80 tracking-widest">Zona Clasificación</span>}
-                            {isDescenso && <span className="text-[7px] font-black uppercase text-rose-500/80 tracking-widest">Zona Descenso</span>}
+                            {isZonaRiesgo && (
+                              <span className={`text-[7px] font-black uppercase tracking-widest ${isRiesgoMaximo ? 'text-rose-500/90' : 'text-rose-400/80'}`}>
+                                {isRiesgoMaximo ? 'Riesgo Máximo' : 'Pelea por no desaparecer'}
+                              </span>
+                            )}
                           </div>
                         </Link>
                       </td>
