@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Settings, LayoutDashboard, LogOut, Twitter, MessageSquare, Coins } from 'lucide-react'
 import { useAuth } from '@/app/context/AuthContext'
@@ -21,6 +21,7 @@ export default function Navbar() {
   const [perfil, setPerfil] = useState<any>(null)
   const { user, loading } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
   
   const links = [
     { name: 'Calendario', href: '/partidos' },
@@ -49,6 +50,10 @@ export default function Navbar() {
     fetchPerfil()
   }, [user])
 
+  useEffect(() => {
+    setIsOpen(false)
+  }, [pathname])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/login')
@@ -64,8 +69,9 @@ export default function Navbar() {
           <img src="/LOGO_PNG.png" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(252,194,0,0.3)]" alt="Logo" />
         </motion.div>
         <motion.div layoutId="shared-league-wordmark" className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-black italic tracking-tight text-white uppercase group-hover:text-[#fcc200] transition-colors whitespace-nowrap">
-          Plebeians <span className="text-[#fcc200] hidden sm:inline">League</span>
-          <span className="text-[#fcc200] sm:hidden">Lg</span>
+          <span className="sm:hidden">La <span className="text-[#fcc200]">Plebe</span></span>
+          <span className="hidden sm:inline lg:hidden">La <span className="text-[#fcc200]">Plebeians</span></span>
+          <span className="hidden lg:inline">Plebeians <span className="text-[#fcc200]">League</span></span>
         </motion.div>
       </Link>
 
