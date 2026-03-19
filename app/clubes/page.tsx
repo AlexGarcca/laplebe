@@ -4,7 +4,8 @@ import { supabase } from '../lib/supabase'
 import { Shield, Loader2 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
-import { FadeInUp, StaggeredGrid, GridItem } from '@/components/AnimatedWrappers' // 🔥 Reutilizando tus componentes top
+import { motion } from 'framer-motion'
+import { FadeInUp, StaggeredGrid, GridItem, RevealSection, SharedPageTitle, ParallaxLayer, SharedMetaBadge } from '@/components/AnimatedWrappers' // 🔥 Reutilizando tus componentes top
 
 export default function ClubesPage() {
   const [clubes, setClubes] = useState<any[]>([])
@@ -54,12 +55,12 @@ export default function ClubesPage() {
         <FadeInUp>
           <header className="mb-12 md:mb-16 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-              <h1 className="text-3xl sm:text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
+              <SharedPageTitle layoutId="shared-page-title" className="text-3xl sm:text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
                 Clubes <span className="text-[#fcc200]">Oficiales</span>
-              </h1>
-              <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mt-3 italic">
+              </SharedPageTitle>
+              <SharedMetaBadge layoutId="shared-page-kicker" className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mt-3 italic">
                 Plebeians League Franchise Directory
-              </p>
+              </SharedMetaBadge>
             </div>
             <div className="px-4 sm:px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3 shadow-xl">
               <Shield size={20} className="text-[#fcc200]" />
@@ -74,38 +75,48 @@ export default function ClubesPage() {
             <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#fcc200]">Cargando Franquicias...</p>
           </div>
         ) : (
+          <RevealSection>
           <StaggeredGrid>
             {clubes.map((club) => (
               <GridItem key={club.id}>
                 {/* 🔥 RECICLAMOS EXACTAMENTE TU DISEÑO DEL MAIN */}
                 <Link href={`/equipo/${club.id}`} className="group block h-full">
-                  <div className="relative bg-[#141414] rounded-[2.2rem] sm:rounded-[2.5rem] border border-white/5 p-5 sm:p-8 flex flex-col items-center transition-all duration-500 group-hover:bg-[#1a1a1a] group-hover:border-[#fcc200]/30 shadow-2xl h-full overflow-hidden">
+                  <motion.div
+                    layoutId={`club-card-${club.id}`}
+                    whileHover={{ y: -10, scale: 1.012 }}
+                    transition={{ type: 'spring', stiffness: 220, damping: 20, mass: 0.8 }}
+                    className="relative bg-[#141414] rounded-[2.2rem] sm:rounded-[2.5rem] border border-white/5 p-5 sm:p-8 flex flex-col items-center transition-all duration-500 group-hover:bg-[#1a1a1a] group-hover:border-[#fcc200]/30 shadow-2xl h-full overflow-hidden"
+                  >
                     {/* Línea superior con el color del equipo */}
                     <div 
                       className="absolute top-0 left-0 w-full h-1 opacity-20 transition-opacity group-hover:opacity-100" 
                       style={{ backgroundColor: club.color_hex || '#fcc200' }} 
                     />
                     
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 mb-5 sm:mb-6 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                      <img 
-                        src={club.escudo_url || '/placeholder.png'} 
-                        alt={club.nombre} 
-                        className="w-full h-full object-contain brightness-110" 
-                      />
-                    </div>
+                    <ParallaxLayer>
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 mb-5 sm:mb-6 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                        <motion.img 
+                          layoutId={`club-crest-${club.id}`}
+                          src={club.escudo_url || '/placeholder.png'} 
+                          alt={club.nombre} 
+                          className="w-full h-full object-contain brightness-110" 
+                        />
+                      </div>
+                    </ParallaxLayer>
                     
-                    <h3 className="text-sm font-black text-center uppercase tracking-widest text-white group-hover:text-[#fcc200] mb-2">
+                    <motion.h3 layoutId={`club-title-${club.id}`} className="text-sm font-black text-center uppercase tracking-widest text-white group-hover:text-[#fcc200] mb-2">
                       {club.nombre}
-                    </h3>
+                    </motion.h3>
                     
                     <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
                       {club.presidente?.split(',')[0]}
                     </p>
-                  </div>
+                  </motion.div>
                 </Link>
               </GridItem>
             ))}
           </StaggeredGrid>
+          </RevealSection>
         )}
 
         {!loading && clubes.length === 0 && (

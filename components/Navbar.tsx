@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Settings, LayoutDashboard, LogOut, Twitter, MessageSquare } from 'lucide-react'
+import { Menu, X, Settings, LayoutDashboard, LogOut, Twitter, MessageSquare, Coins } from 'lucide-react'
 import { useAuth } from '@/app/context/AuthContext'
 import { supabase } from '@/app/lib/supabase'
 
@@ -60,12 +60,12 @@ export default function Navbar() {
       
       {/* LOGO LIGA */}
       <Link href="/" className="flex items-center gap-2 sm:gap-4 group cursor-pointer min-w-0">
-        <div className="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-110">
+        <motion.div layoutId="shared-league-logo" className="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-110">
           <img src="/LOGO_PNG.png" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(252,194,0,0.3)]" alt="Logo" />
-        </div>
-        <div className="text-base sm:text-xl md:text-2xl font-black italic tracking-tighter text-white uppercase group-hover:text-[#fcc200] transition-colors truncate">
+        </motion.div>
+        <motion.div layoutId="shared-league-wordmark" className="text-base sm:text-xl md:text-2xl font-black italic tracking-tighter text-white uppercase group-hover:text-[#fcc200] transition-colors truncate">
           Plebeians <span className="text-[#fcc200]">League</span>
-        </div>
+        </motion.div>
       </Link>
 
       {/* DESKTOP NAV */}
@@ -75,6 +75,7 @@ export default function Navbar() {
             key={link.href} 
             href={link.href} 
             className={`transition-colors cursor-pointer ${link.name === 'BET-ALV' ? 'text-[#fcc200]/60 hover:text-[#fcc200]' : 'hover:text-[#fcc200]'}`}
+            
           >
             {link.name}
           </Link>
@@ -92,17 +93,35 @@ export default function Navbar() {
 
         <div className="flex items-center gap-4 ml-4">
           {isAdmin && (
-            <Link 
-              href="/admin-plebe" 
-              className="p-2 text-zinc-700 hover:text-[#fcc200] transition-all hover:rotate-90 duration-500 cursor-pointer"
-            >
-              <Settings size={18} />
-            </Link>
+            <>
+              <Link
+                href="/admin-jugadores"
+                className="px-3 py-2 rounded-full border border-cyan-500/25 text-cyan-300 hover:bg-cyan-500/10 transition-colors text-[9px] font-black uppercase tracking-widest"
+              >
+                Admin Jugadores
+              </Link>
+              <Link 
+                href="/admin-plebe" 
+                className="p-2 text-zinc-700 hover:text-[#fcc200] transition-all hover:rotate-90 duration-500 cursor-pointer"
+                title="Panel Admin"
+              >
+                <Settings size={18} />
+              </Link>
+            </>
           )}
 
           {!loading && (
             user && perfil?.equipos ? (
               <div className="flex items-center gap-4 pl-4 border-l border-white/10">
+                {typeof perfil?.saldo_bet === 'number' && (
+                  <motion.div
+                    layoutId="shared-bet-saldo"
+                    className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-full bg-[#fcc200]/10 border border-[#fcc200]/20"
+                  >
+                    <Coins size={12} className="text-[#fcc200]" />
+                    <span className="text-[10px] font-black text-white tracking-widest">{perfil.saldo_bet}M</span>
+                  </motion.div>
+                )}
                 <Link href="/vestidor" className="flex items-center gap-3 group cursor-pointer">
                   <div className="text-right hidden lg:block">
                     <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Tu Vestidor</p>
@@ -186,13 +205,22 @@ export default function Navbar() {
             )}
 
             {isAdmin && (
-              <Link 
-                href="/admin-plebe" 
-                onClick={() => setIsOpen(false)}
-                className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] text-center mt-4"
-              >
-                — Panel Maestro —
-              </Link>
+              <div className="mt-4 grid grid-cols-1 gap-2">
+                <Link
+                  href="/admin-jugadores"
+                  onClick={() => setIsOpen(false)}
+                  className="py-3 text-center rounded-xl border border-cyan-500/25 text-cyan-300 font-black uppercase tracking-widest text-[11px]"
+                >
+                  Admin Jugadores
+                </Link>
+                <Link 
+                  href="/admin-plebe" 
+                  onClick={() => setIsOpen(false)}
+                  className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] text-center"
+                >
+                  — Panel Maestro —
+                </Link>
+              </div>
             )}
           </motion.div>
         )}

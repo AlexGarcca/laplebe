@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Dices, Coins, TrendingUp, X, Loader2 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import { useRouter } from 'next/navigation'
+import { FadeInUp, RevealSection, SharedPageTitle, SharedMetaBadge, MOTION_SPRING } from '@/components/AnimatedWrappers'
 
 export default function BetAlvPage() {
   const [partidos, setPartidos] = useState<any[]>([])
@@ -398,15 +399,19 @@ export default function BetAlvPage() {
       <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
         
         <div className="lg:col-span-8">
+          <FadeInUp>
           <header className="mb-10">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
+            <SharedPageTitle layoutId="shared-page-title" className="text-4xl sm:text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
               BET-<span className="text-[#fcc200]">ALV</span>
-            </h1>
+            </SharedPageTitle>
+            <SharedMetaBadge layoutId="shared-page-kicker" className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.42em] mt-2">
+              Casino Console
+            </SharedMetaBadge>
             <div className="flex items-center gap-4 mt-4">
-              <div className="px-4 sm:px-5 py-3 bg-[#fcc200]/10 border border-[#fcc200]/20 rounded-2xl flex items-center gap-3">
+              <motion.div layoutId="shared-bet-saldo" className="px-4 sm:px-5 py-3 bg-[#fcc200]/10 border border-[#fcc200]/20 rounded-2xl flex items-center gap-3">
                 <Coins size={20} className="text-[#fcc200]" />
                 <span className="text-base sm:text-lg font-black text-white italic">{saldo}M <span className="text-zinc-500 not-italic text-[9px] sm:text-[10px] ml-2 tracking-widest uppercase">Lana disponible</span></span>
-              </div>
+              </motion.div>
             </div>
             <div className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest ${cambiosHabilitados ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
               {cambiosHabilitados ? 'Ventana abierta' : 'Ventana cerrada'}
@@ -417,7 +422,9 @@ export default function BetAlvPage() {
               </span>
             </div>
           </header>
+          </FadeInUp>
 
+          <RevealSection>
           <div className="space-y-4">
             {partidos.map((p) => (
               <div key={p.id} className="bg-[#141414] border border-white/5 p-5 sm:p-8 rounded-[2.3rem] sm:rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-[#181818] transition-all">
@@ -438,37 +445,43 @@ export default function BetAlvPage() {
                     const m = p.momios[label]
                     const isSelected = ticket.find(t => t.partidoId === p.id && t.seleccion === label)
                     return (
-                      <button 
+                      <motion.button 
                         key={label}
                         onClick={() => addToTicket(p, label, parseFloat(m))}
                         disabled={!cambiosHabilitados}
+                        whileHover={{ y: -2, scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        transition={MOTION_SPRING.energetic}
                         className={`flex-1 md:flex-none px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl border transition-all group cursor-pointer ${isSelected ? 'bg-[#fcc200] border-[#fcc200] text-black scale-105' : 'bg-black border-white/5 hover:border-[#fcc200] text-zinc-500'}`}
                       >
                         <p className={`text-[8px] font-black uppercase mb-1 ${isSelected ? 'text-black/50' : 'text-zinc-600'}`}>{label}</p>
                         <p className={`text-lg font-black ${isSelected ? 'text-black' : 'text-[#fcc200]'}`}>{m}</p>
-                      </button>
+                      </motion.button>
                     )
                   })}
                 </div>
               </div>
             ))}
           </div>
+          </RevealSection>
         </div>
 
         <div className="lg:col-span-4 space-y-4 sm:space-y-6">
           <div className="lg:hidden bg-[#141414] border border-white/10 rounded-2xl p-2 flex gap-2">
-            <button
+            <motion.button
               onClick={() => switchMobilePanel('ticket')}
+              whileTap={{ scale: 0.98 }}
               className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${mobilePanel === 'ticket' ? 'bg-[#fcc200] text-black' : 'bg-black/40 text-zinc-400'}`}
             >
               Ticket ({ticket.length})
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={() => switchMobilePanel('historial')}
+              whileTap={{ scale: 0.98 }}
               className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${mobilePanel === 'historial' ? 'bg-[#fcc200] text-black' : 'bg-black/40 text-zinc-400'}`}
             >
               Mis Tickets ({ticketsFiltrados.length})
-            </button>
+            </motion.button>
           </div>
 
           <div className={`${mobilePanel === 'ticket' ? 'block animate-in fade-in slide-in-from-right-2 duration-300' : 'hidden'} lg:block bg-[#141414] border-2 border-[#fcc200]/20 rounded-[2.3rem] sm:rounded-[3rem] p-5 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-md`}>
@@ -513,13 +526,16 @@ export default function BetAlvPage() {
                 <Dices size={40} className="text-[#fcc200]/20" />
               </div>
 
-              <button 
+              <motion.button 
                 onClick={handlePlaceBet}
                 disabled={ticket.length === 0 || !apuestaMonto || enviando || !cambiosHabilitados}
+                whileHover={{ y: -2, scale: 1.015 }}
+                whileTap={{ scale: 0.985 }}
+                transition={MOTION_SPRING.energetic}
                 className="w-full py-5 sm:py-6 bg-[#fcc200] text-black rounded-4xl font-black uppercase italic tracking-[0.14em] sm:tracking-widest hover:scale-[1.03] active:scale-95 transition-all disabled:opacity-20 shadow-2xl shadow-[#fcc200]/20 cursor-pointer flex items-center justify-center gap-3 text-sm sm:text-base"
               >
                 {enviando ? <Loader2 className="animate-spin" /> : 'METER APUESTA ALV 🎰'}
-              </button>
+              </motion.button>
             </div>
           </div>
 

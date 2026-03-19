@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabase'
 import Navbar from '@/components/Navbar'
 import { PlusCircle, Save, Trash2, RefreshCw, ArrowRightLeft, UserRoundCog } from 'lucide-react'
+import { FadeInUp, RevealSection, SharedPageTitle, SmartStaggerItem, SmartStaggerList } from '@/components/AnimatedWrappers'
 
 type Equipo = {
   id: string
@@ -317,11 +318,12 @@ export default function AdminJugadoresPage() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 space-y-8">
+        <FadeInUp>
         <header className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
           <div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">
+            <SharedPageTitle layoutId="shared-page-title" className="text-3xl sm:text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">
               Admin de <span className="text-[#fcc200]">Plantillas</span>
-            </h1>
+            </SharedPageTitle>
             <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] mt-2 italic">
               Club Roster Console
             </p>
@@ -335,7 +337,9 @@ export default function AdminJugadoresPage() {
             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
           </button>
         </header>
+        </FadeInUp>
 
+        <RevealSection>
         <section className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-5 sm:p-7">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-1.5 h-6 bg-[#fcc200] rounded-full"></div>
@@ -365,7 +369,9 @@ export default function AdminJugadoresPage() {
             </div>
           )}
         </section>
+        </RevealSection>
 
+        <RevealSection>
         <section className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-5 sm:p-7">
           <div className="flex items-center gap-3 mb-5">
             <PlusCircle size={18} className="text-[#fcc200]" />
@@ -440,7 +446,9 @@ export default function AdminJugadoresPage() {
             {creando ? 'Creando...' : 'Agregar Jugador'}
           </button>
         </section>
+        </RevealSection>
 
+        <RevealSection>
         <section className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-4 sm:p-6 overflow-x-auto">
           <div className="flex items-center gap-3 mb-6">
             <UserRoundCog size={18} className="text-zinc-400" />
@@ -475,14 +483,15 @@ export default function AdminJugadoresPage() {
                 <div className="col-span-2 text-center">Acciones</div>
               </div>
 
+              <SmartStaggerList itemsCount={jugadoresFiltrados.length} className="space-y-2">
               {jugadoresFiltrados.map((j) => {
                 const estaGuardando = guardandoId === j.id
                 const estaEliminando = eliminandoId === j.id
 
                 return (
+                  <SmartStaggerItem key={j.id}>
                   <div
-                    key={j.id}
-                    className="grid grid-cols-12 gap-2 items-center bg-black/40 border border-white/5 hover:border-[#fcc200]/20 rounded-xl p-2"
+                    className="grid grid-cols-12 gap-2 items-center bg-black/40 border border-white/5 hover:border-[#fcc200]/20 rounded-xl p-2 motion-card"
                   >
                     <input
                       type="text"
@@ -558,8 +567,10 @@ export default function AdminJugadoresPage() {
                       </button>
                     </div>
                   </div>
+                  </SmartStaggerItem>
                 )
               })}
+              </SmartStaggerList>
             </div>
           )}
 
@@ -568,6 +579,7 @@ export default function AdminJugadoresPage() {
             Para mover un jugador, selecciona otro club en "Mover a Club" y presiona Guardar.
           </p>
         </section>
+        </RevealSection>
       </main>
     </div>
   )

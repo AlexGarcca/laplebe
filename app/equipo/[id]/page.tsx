@@ -3,8 +3,9 @@ import { supabase } from '../../lib/supabase' // Asegúrate de que esta ruta rel
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
-import { FadeInUp, StaggeredGrid, GridItem } from '@/components/AnimatedWrappers'
+import { FadeInUp, StaggeredGrid, GridItem, SharedMetaBadge } from '@/components/AnimatedWrappers'
 import { ChevronLeft } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export default function EquipoPage({ params }: { params: any }) {
   const [equipo, setEquipo] = useState<any>(null)
@@ -58,7 +59,7 @@ export default function EquipoPage({ params }: { params: any }) {
         ></div>
         
         <FadeInUp>
-          <div className="max-w-7xl mx-auto relative z-10">
+          <motion.div layoutId={equipo?.id ? `club-card-${equipo.id}` : undefined} className="max-w-7xl mx-auto relative z-10">
             {/* Botón Volver - Ahora te regresa a la lista de clubes */}
             <Link 
               href="/clubes" 
@@ -69,12 +70,12 @@ export default function EquipoPage({ params }: { params: any }) {
             </Link>
 
             <div className="flex flex-col md:flex-row items-center md:items-end gap-6 sm:gap-8 md:gap-12 text-center md:text-left">
-              <img src={equipo.escudo_url} className="w-26 h-26 sm:w-32 sm:h-32 md:w-48 md:h-48 object-contain brightness-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" alt="Logo" />
+              <motion.img layoutId={`club-crest-${equipo.id}`} src={equipo.escudo_url} className="w-26 h-26 sm:w-32 sm:h-32 md:w-48 md:h-48 object-contain brightness-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" alt="Logo" />
               <div className="flex-1">
-                <span className="inline-block px-4 py-1 bg-white/5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-[0.4em] text-zinc-500 border border-white/5 mb-6">Club Oficial • Plebeians League</span>
-                <h1 className="text-4xl sm:text-6xl md:text-9xl font-black uppercase italic tracking-tighter leading-none mb-4 sm:mb-6" style={{ color: colorEquipo }}>
+                <SharedMetaBadge layoutId="shared-page-kicker" className="inline-block px-4 py-1 bg-white/5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-[0.4em] text-zinc-500 border border-white/5 mb-6">Club Oficial • Plebeians League</SharedMetaBadge>
+                <motion.h1 layoutId={`club-title-${equipo.id}`} className="text-4xl sm:text-6xl md:text-9xl font-black uppercase italic tracking-tighter leading-none mb-4 sm:mb-6" style={{ color: colorEquipo }}>
                   {equipo.nombre}
-                </h1>
+                </motion.h1>
                 <div className="flex flex-col md:flex-row md:items-center justify-center md:justify-start gap-4 md:gap-6 text-zinc-400">
                   <p className="text-lg md:text-xl font-medium tracking-tight">Presi: <b className="text-white uppercase font-black">{equipo.presidente || '-'}</b></p>
                   <div className="h-4 w-px bg-white/10 hidden md:block"></div>
@@ -82,7 +83,7 @@ export default function EquipoPage({ params }: { params: any }) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </FadeInUp>
       </header>
 
@@ -109,7 +110,11 @@ export default function EquipoPage({ params }: { params: any }) {
 
               return (
                 <GridItem key={jugador.id}>
-                  <div className="group relative bg-[#141414] rounded-4xl md:rounded-[2.5rem] border border-white/5 p-5 md:p-8 flex flex-col transition-all duration-500 hover:bg-[#1a1a1a] hover:border-white/10 shadow-2xl overflow-hidden h-full cursor-default">
+                  <motion.div
+                    whileHover={{ y: -8, scale: 1.01 }}
+                    transition={{ type: 'spring', stiffness: 230, damping: 20, mass: 0.85 }}
+                    className="group relative bg-[#141414] rounded-4xl md:rounded-[2.5rem] border border-white/5 p-5 md:p-8 flex flex-col transition-all duration-500 hover:bg-[#1a1a1a] hover:border-white/10 shadow-2xl overflow-hidden h-full cursor-default"
+                  >
                     {/* Barra de color lateral dinámica */}
                     <div className="absolute top-0 right-0 w-1 h-full opacity-30 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: colorEspecial }}></div>
 
@@ -134,7 +139,7 @@ export default function EquipoPage({ params }: { params: any }) {
                         <span className="text-xs md:text-sm font-black text-white">{jugador.valoracion || '80'}</span>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </GridItem>
               );
             })}

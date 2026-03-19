@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShieldCheck, Users, LayoutDashboard, ChevronRight, Clock, ShieldAlert, AlertTriangle } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import { FadeInUp, RevealSection, SharedPageTitle, SharedMetaBadge } from '@/components/AnimatedWrappers'
 
 export default function VestidorPage() {
   const [perfil, setPerfil] = useState<any>(null)
@@ -122,13 +123,17 @@ export default function VestidorPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans pb-20">
       <Navbar />
       <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12">
+        <FadeInUp>
         <header className="mb-8 bg-linear-to-b from-[#141414] to-transparent border border-white/5 p-4 sm:p-6 md:p-10 rounded-[2.2rem] sm:rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
             <img src={equipo.escudo_url} className="w-20 h-20 object-contain drop-shadow-2xl" alt="" />
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black uppercase italic tracking-tighter leading-none mb-2 text-white text-center md:text-left">
+              <SharedPageTitle layoutId="shared-page-title" className="text-2xl sm:text-3xl md:text-5xl font-black uppercase italic tracking-tighter leading-none mb-2 text-white text-center md:text-left">
                 Manager <span className="text-[#fcc200]">{perfil.nombre_presidente.split(' ')[0]}</span>
-              </h1>
+              </SharedPageTitle>
+              <SharedMetaBadge layoutId="shared-page-kicker" className="text-zinc-600 text-[9px] font-black uppercase tracking-[0.35em] mb-2 text-center md:text-left">
+                Tactical Console
+              </SharedMetaBadge>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Siguiente: {rival || 'Por definir'}</span>
                 {tiempoRestante && (
@@ -141,9 +146,11 @@ export default function VestidorPage() {
             </div>
           </div>
         </header>
+        </FadeInUp>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 flex flex-col gap-6">
+            <RevealSection>
             <div className="bg-[#141414] rounded-[2.2rem] sm:rounded-[3rem] border border-white/5 p-4 md:p-10 shadow-2xl">
               <div className="flex justify-between items-center mb-6 px-2">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 flex items-center gap-2"><LayoutDashboard size={14} className="text-[#fcc200]" /> Pizarra Táctica</h3>
@@ -211,18 +218,23 @@ export default function VestidorPage() {
                   </div>
                 </div>
               </div>
-              <button 
+              <motion.button 
                 onClick={handleConfirm} 
                 disabled={enviando || !proximoPartido || tiempoRestante === "VESTIDOR CERRADO 🔒"} 
+                whileHover={{ y: -2, scale: 1.012 }}
+                whileTap={{ scale: 0.985 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 18 }}
                 className="mt-8 w-full py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-[0.14em] sm:tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-30 shadow-xl shadow-[#fcc200]/10 flex items-center justify-center gap-3 cursor-pointer text-sm sm:text-base"
               >
                 <ShieldCheck size={20} />{enviando ? 'ENVIANDO...' : 'CONFIRMAR TITULARES'}
-              </button>
+              </motion.button>
             </div>
+            </RevealSection>
           </div>
 
           {/* SIDEBAR DE PLANTILLA */}
           <div className="lg:col-span-4">
+            <RevealSection>
             <div className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-6 md:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <Users size={18} className="text-zinc-500" />
@@ -234,8 +246,10 @@ export default function VestidorPage() {
                   const riesgoAmarillas = j.amarillas_acumuladas >= 2;
 
                   return (
-                    <div 
+                    <motion.div 
                       key={j.id} 
+                      whileHover={{ y: -2, scale: 1.005 }}
+                      transition={{ type: 'spring', stiffness: 240, damping: 18 }}
                       className={`flex flex-col p-3 rounded-2xl border transition-all ${suspendido ? 'bg-black/40 border-rose-500/20 opacity-60' : 'bg-white/2 border-white/5 group hover:border-[#fcc200]/20'}`}
                     >
                       <div className="flex items-center justify-between mb-1">
@@ -263,11 +277,12 @@ export default function VestidorPage() {
                             <span className="text-[7px] font-bold text-zinc-600 uppercase">{j.amarillas_acumuladas}/3 AMARILLAS</span>
                          </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
             </div>
+            </RevealSection>
           </div>
         </div>
       </main>

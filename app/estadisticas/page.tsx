@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import MatchTicker from '@/components/MatchTicker'
 import Navbar from '@/components/Navbar'
-import { FadeInUp } from '@/components/AnimatedWrappers'
+import { FadeInUp, RevealSection, SharedPageTitle, SharedMetaBadge, SmartStaggerList, SmartStaggerItem } from '@/components/AnimatedWrappers'
 
 export default function EstadisticasPage() {
   const [activeTab, setActiveTab] = useState('goles')
@@ -141,24 +141,31 @@ export default function EstadisticasPage() {
       <main className="max-w-5xl mx-auto p-4 sm:p-6 md:p-8 md:py-20">
         <header className="mb-12 text-center">
           <FadeInUp>
-            <h1 className="text-3xl sm:text-4xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-6 leading-none">
+            <SharedPageTitle layoutId="shared-page-title" className="text-3xl sm:text-4xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-6 leading-none">
               Líderes del <span className="text-[#fcc200]">Torneo</span>
-            </h1>
+            </SharedPageTitle>
+            <SharedMetaBadge layoutId="shared-page-kicker" className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.45em] mb-3">
+              Data Console • Plebeians League
+            </SharedMetaBadge>
             
             <div className="flex overflow-x-auto pb-4 md:pb-0 md:justify-center gap-3 mt-8 no-scrollbar">
               {['goles', 'asistencias', 'porteros', 'tarjetas', 'mvp'].map(tab => (
-                <button 
+                <motion.button 
                   key={tab} 
                   onClick={() => setActiveTab(tab)}
+                  whileHover={{ y: -2, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 280, damping: 18 }}
                   className={`flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-[#fcc200] text-black shadow-xl scale-105' : 'bg-[#141414] text-zinc-500 border border-white/5 hover:text-white'}`}
                 >
                   {tab === 'porteros' ? 'GUANTE ORO' : tab === 'tarjetas' ? 'FAIR PLAY' : tab}
-                </button>
+                </motion.button>
               ))}
             </div>
           </FadeInUp>
         </header>
 
+        <RevealSection>
         <section className="min-h-100">
           <AnimatePresence mode="wait">
             {loading ? (
@@ -195,26 +202,31 @@ export default function EstadisticasPage() {
               </motion.div>
             ) : (
               <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid gap-4">
-                {data.map((item, i) => (
-                  <div key={i} className="bg-[#141414] border border-white/5 rounded-4xl md:rounded-[2.5rem] p-6 md:p-8 flex items-center justify-between group hover:border-[#fcc200]/30 transition-all shadow-2xl">
-                    <div className="flex items-center gap-4 md:gap-8">
-                      <span className={`text-2xl md:text-4xl font-black italic ${i < 3 ? 'text-[#fcc200]' : 'text-zinc-800'}`}>#{i + 1}</span>
-                      <img src={item.escudo} className="w-10 h-10 md:w-12 md:h-12 object-contain" alt="" />
-                      <div>
-                        <h3 className="text-sm md:text-xl font-black uppercase italic text-white group-hover:text-[#fcc200] transition-colors leading-none">{item.nombre}</h3>
-                        <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1 md:mt-2">{item.equipo}</p>
+                <SmartStaggerList itemsCount={data.length} className="grid gap-4">
+                  {data.map((item, i) => (
+                    <SmartStaggerItem key={i}>
+                      <div className="bg-[#141414] border border-white/5 rounded-4xl md:rounded-[2.5rem] p-6 md:p-8 flex items-center justify-between group hover:border-[#fcc200]/30 transition-all shadow-2xl motion-card">
+                        <div className="flex items-center gap-4 md:gap-8">
+                          <span className={`text-2xl md:text-4xl font-black italic ${i < 3 ? 'text-[#fcc200]' : 'text-zinc-800'}`}>#{i + 1}</span>
+                          <img src={item.escudo} className="w-10 h-10 md:w-12 md:h-12 object-contain" alt="" />
+                          <div>
+                            <h3 className="text-sm md:text-xl font-black uppercase italic text-white group-hover:text-[#fcc200] transition-colors leading-none">{item.nombre}</h3>
+                            <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1 md:mt-2">{item.equipo}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter">{item.valor}</span>
+                          <p className="text-[7px] md:text-[8px] font-black text-[#fcc200] uppercase tracking-widest mt-1">{item.label}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter">{item.valor}</span>
-                      <p className="text-[7px] md:text-[8px] font-black text-[#fcc200] uppercase tracking-widest mt-1">{item.label}</p>
-                    </div>
-                  </div>
-                ))}
+                    </SmartStaggerItem>
+                  ))}
+                </SmartStaggerList>
               </motion.div>
             )}
           </AnimatePresence>
         </section>
+        </RevealSection>
       </main>
 
       <style jsx>{`

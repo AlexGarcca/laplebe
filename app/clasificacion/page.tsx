@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import MatchTicker from '@/components/MatchTicker'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
-import { FadeInUp } from '@/components/AnimatedWrappers'
+import { FadeInUp, RevealSection, SharedPageTitle, SharedMetaBadge, MOTION_SPRING } from '@/components/AnimatedWrappers'
 import { Trophy } from 'lucide-react'
 
 export default function ClasificacionPage() {
@@ -110,13 +110,14 @@ export default function ClasificacionPage() {
       <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 mt-6 md:mt-8">
         <header className="mb-12 md:mb-16 text-center">
           <FadeInUp>
-            <h1 className="text-3xl sm:text-4xl md:text-7xl font-black uppercase italic tracking-tighter text-white mb-4 leading-none text-balance">
+            <SharedPageTitle layoutId="shared-page-title" className="text-3xl sm:text-4xl md:text-7xl font-black uppercase italic tracking-tighter text-white mb-4 leading-none text-balance">
               Tabla <span className="text-[#fcc200]">General</span>
-            </h1>
-            <p className="text-zinc-500 text-[9px] md:text-[11px] font-black uppercase tracking-[0.5em]">Split 3 • Plebeians League 2026</p>
+            </SharedPageTitle>
+            <SharedMetaBadge layoutId="shared-page-kicker" className="text-zinc-500 text-[9px] md:text-[11px] font-black uppercase tracking-[0.5em]">Split 3 • Plebeians League 2026</SharedMetaBadge>
           </FadeInUp>
         </header>
 
+        <RevealSection>
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
@@ -150,7 +151,9 @@ export default function ClasificacionPage() {
                       key={equipo.id} 
                       initial={{ opacity: 0 }} 
                       animate={{ opacity: 1 }}
-                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.998 }}
+                      transition={{ ...MOTION_SPRING.calm, delay: index * 0.04 }}
                       className="group hover:bg-white/5 transition-all cursor-default"
                     >
                       <td className="py-4 text-center">
@@ -191,6 +194,7 @@ export default function ClasificacionPage() {
             </table>
           </div>
         </motion.div>
+        </RevealSection>
       </main>
       
       <style jsx>{`

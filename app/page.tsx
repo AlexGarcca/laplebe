@@ -4,7 +4,7 @@ import MatchTicker from '@/components/MatchTicker'
 import HallOfFame from '@/components/HallOfFame'
 import Navbar from '@/components/Navbar'
 import Sponsors from '@/components/Sponsors' // 🔥 IMPORTADO
-import { FadeInUp, StaggeredGrid, GridItem } from '@/components/AnimatedWrappers'
+import { FadeInUp, StaggeredGrid, GridItem, ParallaxLayer, RevealSection, SharedPageTitle, SharedMetaBadge } from '@/components/AnimatedWrappers'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -40,23 +40,25 @@ export default async function Home() {
         {/* HERO BANNER */}
         <header className="relative w-full py-24 sm:py-32 md:py-56 flex items-center justify-center text-center px-4 sm:px-8 border-b border-white/5 overflow-hidden">
           <div className="absolute inset-0 z-0">
-            <img 
-              src="/banner.jpg" 
-              className="w-full h-full object-cover opacity-40 scale-105" 
-              alt="Banner" 
-            />
+            <ParallaxLayer>
+              <img 
+                src="/banner.jpg" 
+                className="w-full h-full object-cover opacity-40 scale-105" 
+                alt="Banner" 
+              />
+            </ParallaxLayer>
             <div className="absolute inset-0 bg-linear-to-b from-[#0a0a0a] via-transparent to-[#0a0a0a]"></div>
             <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
           </div>
           <FadeInUp>
             <div className="relative z-10 max-w-5xl">
-              <span className="inline-block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.5em] text-[#fcc200] mb-7 sm:mb-10 bg-[#fcc200]/10 px-4 sm:px-6 py-2.5 rounded-full border border-[#fcc200]/20 backdrop-blur-md">
+              <SharedMetaBadge layoutId="shared-page-kicker" className="inline-block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.5em] text-[#fcc200] mb-7 sm:mb-10 bg-[#fcc200]/10 px-4 sm:px-6 py-2.5 rounded-full border border-[#fcc200]/20 backdrop-blur-md">
                 Temporada Regular 2026 • Split 3
-              </span>
-              <h1 className="text-4xl sm:text-6xl md:text-9xl font-black uppercase italic tracking-tighter text-white mb-7 sm:mb-10 leading-[0.9] sm:leading-[0.85] drop-shadow-2xl">
+              </SharedMetaBadge>
+              <SharedPageTitle layoutId="shared-page-title" className="text-4xl sm:text-6xl md:text-9xl font-black uppercase italic tracking-tighter text-white mb-7 sm:mb-10 leading-[0.9] sm:leading-[0.85] drop-shadow-2xl">
                 La Liga de los <br />
                 <span className="text-[#fcc200] drop-shadow-[0_0_50px_rgba(252,194,0,0.4)]">Plebeyos</span>
-              </h1>
+              </SharedPageTitle>
               <p className="text-zinc-400 text-base sm:text-lg md:text-2xl font-medium max-w-2xl mx-auto tracking-tight leading-relaxed opacity-90 px-2 sm:px-4">
                 14 clubes, una sola corona. La competición más intensa de México llevada al siguiente nivel digital.
               </p>
@@ -93,6 +95,7 @@ export default async function Home() {
             ))}
           </StaggeredGrid>
 
+          <RevealSection>
           <section className="mt-20 md:mt-40 mb-14 md:mb-20 relative px-0 sm:px-4">
             <FadeInUp delay={0.1}>
               <div className="max-w-5xl mx-auto bg-linear-to-b from-[#141414] to-[#0a0a0a] border border-white/5 rounded-[2.3rem] sm:rounded-[3.5rem] p-6 sm:p-12 md:p-20 text-center shadow-2xl relative overflow-hidden group">
@@ -107,9 +110,12 @@ export default async function Home() {
               </div>
             </FadeInUp>
           </section>
+          </RevealSection>
 
           {/* 🔥 SECCIÓN DE PATROCINADORES AGREGADA AL FINAL */}
-          <Sponsors />
+          <RevealSection>
+            <Sponsors />
+          </RevealSection>
           
         </main>
       </div>

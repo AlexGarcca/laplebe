@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import MatchTicker from '@/components/MatchTicker'
 import Navbar from '@/components/Navbar'
-import { FadeInUp } from '@/components/AnimatedWrappers'
+import { FadeInUp, RevealSection, SharedPageTitle, SharedMetaBadge } from '@/components/AnimatedWrappers'
 
 export default function CalendarioPage() {
   const [partidos, setPartidos] = useState<any[]>([])
@@ -41,10 +41,10 @@ export default function CalendarioPage() {
       <main className="max-w-4xl mx-auto p-4 sm:p-6 md:p-12 md:py-20">
         <header className="mb-12 text-center">
           <FadeInUp>
-            <h1 className="text-3xl sm:text-5xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-4 leading-tight">
+            <SharedPageTitle layoutId="shared-page-title" className="text-3xl sm:text-5xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-4 leading-tight">
               Calendario <span className="text-[#fcc200]">Plebe</span>
-            </h1>
-            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em]">Temporada 2026 • Split 3</p>
+            </SharedPageTitle>
+            <SharedMetaBadge layoutId="shared-page-kicker" className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em]">Temporada 2026 • Split 3</SharedMetaBadge>
           </FadeInUp>
         </header>
 
@@ -66,6 +66,7 @@ export default function CalendarioPage() {
         </div>
 
         {/* LISTA DE PARTIDOS REDISEÑADA */}
+        <RevealSection>
         <div className="space-y-4">
           <AnimatePresence mode="wait">
             {loading ? (
@@ -140,6 +141,7 @@ export default function CalendarioPage() {
             )}
           </AnimatePresence>
         </div>
+        </RevealSection>
       </main>
 
       <style jsx>{`
