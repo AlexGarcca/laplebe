@@ -5,11 +5,12 @@ import { Shield, Loader2 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { FadeInUp, StaggeredGrid, GridItem, RevealSection, SharedPageTitle, ParallaxLayer, SharedMetaBadge } from '@/components/AnimatedWrappers' // 🔥 Reutilizando tus componentes top
+import { FadeInUp, StaggeredGrid, GridItem, RevealSection, SharedPageTitle, SharedMetaBadge } from '@/components/AnimatedWrappers' // 🔥 Reutilizando tus componentes top
 
 export default function ClubesPage() {
   const [clubes, setClubes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchClubes()
@@ -17,34 +18,42 @@ export default function ClubesPage() {
 
   const fetchClubes = async () => {
     setLoading(true)
+    setLoadError(null)
     
-    // 1. Traemos todos los equipos EXCEPTO "DRAFT"
-    const { data: equiposData } = await supabase
-      .from('equipos')
-      .select('*')
-      .neq('nombre', 'DRAFT')
-      .order('nombre')
+    try {
+      const [equiposRes, presisRes] = await Promise.all([
+        supabase
+          .from('equipos')
+          .select('*')
+          .neq('nombre', 'DRAFT')
+          .order('nombre'),
+        supabase
+          .from('perfiles_presidentes')
+          .select('nombre_presidente, equipo_id')
+          .eq('aprobado', true),
+      ])
 
-    // 2. Traemos a los presidentes
-    const { data: presisData } = await supabase
-      .from('perfiles_presidentes')
-      .select('nombre_presidente, equipo_id')
-      .eq('aprobado', true)
+      if (equiposRes.error) throw equiposRes.error
+      if (presisRes.error) throw presisRes.error
 
-    if (equiposData) {
+      const equiposData = equiposRes.data || []
+      const presisData = presisRes.data || []
+
       const equiposOficiales = equiposData.filter(e => e.nombre.toUpperCase() !== 'DRAFT')
+      const presisByEquipo = new Map(presisData.map(p => [p.equipo_id, p.nombre_presidente]))
 
-      const equiposConPresi = equiposOficiales.map(equipo => {
-        const presi = presisData?.find(p => p.equipo_id === equipo.id)
-        return {
-          ...equipo,
-          presidente: presi ? presi.nombre_presidente : 'Sin Presidente'
-        }
-      })
+      const equiposConPresi = equiposOficiales.map(equipo => ({
+        ...equipo,
+        presidente: presisByEquipo.get(equipo.id) || 'Sin Presidente'
+      }))
+
       setClubes(equiposConPresi)
+    } catch (error: any) {
+      setLoadError(error?.message || 'No se pudieron cargar los clubes')
+      setClubes([])
+    } finally {
+      setLoading(false)
     }
-    
-    setLoading(false)
   }
 
   return (
@@ -93,16 +102,14 @@ export default function ClubesPage() {
                       style={{ backgroundColor: club.color_hex || '#fcc200' }} 
                     />
                     
-                    <ParallaxLayer>
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 mb-5 sm:mb-6 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                        <motion.img 
-                          layoutId={`club-crest-${club.id}`}
-                          src={club.escudo_url || '/placeholder.png'} 
-                          alt={club.nombre} 
-                          className="w-full h-full object-contain brightness-110" 
-                        />
-                      </div>
-                    </ParallaxLayer>
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 mb-5 sm:mb-6 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                      <motion.img 
+                        layoutId={`club-crest-${club.id}`}
+                        src={club.escudo_url || '/placeholder.png'} 
+                        alt={club.nombre} 
+                        className="w-full h-full object-contain brightness-110" 
+                      />
+                    </div>
                     
                     <motion.h3 layoutId={`club-title-${club.id}`} className="text-sm font-black text-center uppercase tracking-widest text-white group-hover:text-[#fcc200] mb-2">
                       {club.nombre}
@@ -119,7 +126,23 @@ export default function ClubesPage() {
           </RevealSection>
         )}
 
-        {!loading && clubes.length === 0 && (
+        {!loading && loadError && (
+          <FadeInUp delay={0.15}>
+            <div className="text-center py-16 bg-[#141414] rounded-[3rem] border border-rose-500/20 shadow-2xl">
+              <Shield size={44} className="mx-auto text-rose-500/80 mb-4" />
+              <p className="text-rose-400 font-black uppercase tracking-[0.25em] text-[10px] mb-3">Error de Carga</p>
+              <p className="text-zinc-500 text-xs font-bold">{loadError}</p>
+              <button
+                onClick={fetchClubes}
+                className="mt-6 px-5 py-3 rounded-xl border border-white/10 text-zinc-300 hover:text-white hover:border-[#fcc200]/40 transition-all text-[10px] font-black uppercase tracking-widest"
+              >
+                Reintentar
+              </button>
+            </div>
+          </FadeInUp>
+        )}
+
+        {!loading && !loadError && clubes.length === 0 && (
           <FadeInUp delay={0.2}>
             <div className="text-center py-20 bg-[#141414] rounded-[3rem] border border-white/5 shadow-2xl">
               <Shield size={48} className="mx-auto text-zinc-800 mb-4" />

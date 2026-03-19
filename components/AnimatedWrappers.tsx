@@ -1,6 +1,6 @@
 'use client'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useMemo, useRef } from 'react'
 
 interface WrapperProps { children: ReactNode; delay?: number; }
 interface SharedTitleProps extends WrapperProps {
@@ -37,15 +37,7 @@ const scaleTime = (value: number, factor: number) => Number((value * factor).toF
 
 function useMotionPreset() {
   const prefersReduced = useReducedMotion()
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const query = window.matchMedia('(max-width: 900px)')
-    const onChange = () => setIsMobile(query.matches)
-    onChange()
-    query.addEventListener('change', onChange)
-    return () => query.removeEventListener('change', onChange)
-  }, [])
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 900 : false
 
   return useMemo(() => {
     if (prefersReduced) {
