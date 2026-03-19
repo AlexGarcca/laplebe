@@ -103,6 +103,82 @@ END $$;
 ALTER TABLE public.bet_tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bet_movimientos ENABLE ROW LEVEL SECURITY;
 
+-- Admin helper (single source of truth for privileged RLS checks)
+CREATE OR REPLACE FUNCTION public.is_super_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT COALESCE((auth.jwt() ->> 'email') = 'garcca29@gmail.com', false);
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_super_admin TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_super_admin TO postgres;
+
+-- Enable RLS on admin-result workflow tables (safe if already enabled)
+ALTER TABLE public.partidos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.jugadores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.estadisticas_jugadores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.alineaciones ENABLE ROW LEVEL SECURITY;
+
+-- partidos policies for admin result closure
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'partidos' AND policyname = 'admin_select_partidos') THEN
+    CREATE POLICY admin_select_partidos ON public.partidos
+      FOR SELECT USING (public.is_super_admin());
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'partidos' AND policyname = 'admin_update_partidos') THEN
+    CREATE POLICY admin_update_partidos ON public.partidos
+      FOR UPDATE USING (public.is_super_admin())
+      WITH CHECK (public.is_super_admin());
+  END IF;
+END $$;
+
+-- jugadores policies for disciplinary updates
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'jugadores' AND policyname = 'admin_select_jugadores') THEN
+    CREATE POLICY admin_select_jugadores ON public.jugadores
+      FOR SELECT USING (public.is_super_admin());
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'jugadores' AND policyname = 'admin_update_jugadores') THEN
+    CREATE POLICY admin_update_jugadores ON public.jugadores
+      FOR UPDATE USING (public.is_super_admin())
+      WITH CHECK (public.is_super_admin());
+  END IF;
+END $$;
+
+-- estadisticas_jugadores policies for replace-on-save flow
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'estadisticas_jugadores' AND policyname = 'admin_select_estadisticas_jugadores') THEN
+    CREATE POLICY admin_select_estadisticas_jugadores ON public.estadisticas_jugadores
+      FOR SELECT USING (public.is_super_admin());
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'estadisticas_jugadores' AND policyname = 'admin_insert_estadisticas_jugadores') THEN
+    CREATE POLICY admin_insert_estadisticas_jugadores ON public.estadisticas_jugadores
+      FOR INSERT WITH CHECK (public.is_super_admin());
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'estadisticas_jugadores' AND policyname = 'admin_delete_estadisticas_jugadores') THEN
+    CREATE POLICY admin_delete_estadisticas_jugadores ON public.estadisticas_jugadores
+      FOR DELETE USING (public.is_super_admin());
+  END IF;
+END $$;
+
+-- alineaciones policy for GK lookup during result capture
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'alineaciones' AND policyname = 'admin_select_alineaciones') THEN
+    CREATE POLICY admin_select_alineaciones ON public.alineaciones
+      FOR SELECT USING (public.is_super_admin());
+  END IF;
+END $$;
+
 -- bet_tickets policies
 DO $$ 
 BEGIN

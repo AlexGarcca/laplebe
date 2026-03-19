@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import { Save, ChevronRight, Loader2, Shield, Activity } from 'lucide-react'
 
+const ADMIN_EMAIL = 'garcca29@gmail.com'
+
 export default function AdminResultadosPage() {
   const [partidos, setPartidos] = useState<any[]>([])
   const [jornadas, setJornadas] = useState<number[]>([])
@@ -32,7 +34,7 @@ export default function AdminResultadosPage() {
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user?.email !== 'garcca29@gmail.com') router.push('/')
+      if (user?.email?.toLowerCase() !== ADMIN_EMAIL) router.push('/')
       else fetchPartidosPendientes()
     }
     checkAdmin()
@@ -130,7 +132,7 @@ export default function AdminResultadosPage() {
 
       if (partidoError) throw partidoError
       if (!partidoActualizado || partidoActualizado.length === 0) {
-        throw new Error('No se pudo marcar el partido como jugado. Revisa permisos en Supabase (RLS).')
+        throw new Error('No se pudo marcar el partido como jugado. RLS bloqueó el UPDATE de partidos para este usuario admin.')
       }
 
       // 2. PROCESAR ESTADÍSTICAS Y SANCIONES (TRIBUNAL)
