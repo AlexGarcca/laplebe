@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const logoutDueToInactivity = async () => {
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
     setUser(null)
     alert("Sesión cerrada por inactividad.")
     router.push('/login')
@@ -28,7 +28,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session }, error } = await supabase.auth.getSession()
+
+      if (error) {
+        const msg = error.message?.toLowerCase() || ''
+        if (msg.includes('refresh token')) {
+          // Si el refresh token ya no existe, limpiamos la sesión local para evitar errores repetidos.
+          await supabase.auth.signOut({ scope: 'local' })
+        }
+        setUser(null)
+        setLoading(false)
+        return
+      }
+
       setUser(session?.user ?? null)
       setLoading(false)
     }

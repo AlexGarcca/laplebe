@@ -14,15 +14,11 @@ export default function AdminResultadosPage() {
   const [jugadoresLocal, setJugadoresLocal] = useState<any[]>([])
   const [jugadoresVisita, setJugadoresVisita] = useState<any[]>([])
   
-  // Estado global del partido
   const [golesLocal, setGolesLocal] = useState(0)
   const [golesVisita, setGolesVisita] = useState(0)
-  
-  // 🔥 NUEVO: Estado para Shootouts
   const [golesShootoutLocal, setGolesShootoutLocal] = useState(0)
   const [golesShootoutVisita, setGolesShootoutVisita] = useState(0)
 
-  // Porteros Activos
   const [porteroLocalId, setPorteroLocalId] = useState<string>('')
   const [porteroVisitaId, setPorteroVisitaId] = useState<string>('')
 
@@ -90,22 +86,16 @@ export default function AdminResultadosPage() {
   }
 
   const handleGuardar = async () => {
-    // Validaciones
     if (golesLocal === golesVisita && golesShootoutLocal === golesShootoutVisita) {
-      alert('⚠️ Es un empate en tiempo regular. ¡Alguien tiene que ganar en los Shootouts!')
+      alert('⚠️ Empate en regular. ¡Define los Shootouts!')
       return
     }
-
-    if (!porteroLocalId || !porteroVisitaId) {
-      if (!confirm('No has seleccionado a los porteros. Los goles no se registrarán al Guante de Oro. ¿Deseas continuar?')) return
-    } else {
-      if (!confirm('¿Cerrar este partido? Se actualizará la Tabla General (con reglas de Shootouts) y las apuestas.')) return
-    }
+    if (!confirm('¿Cerrar partido? Se aplicarán Goles, Apuestas y SANCIONES automáticamente.')) return
     
     setGuardando(true)
 
     try {
-      // 1. GUARDAR MARCADOR (Incluyendo Shootouts)
+      // 1. GUARDAR MARCADOR
       await supabase.from('partidos').update({
         jugado: true,
         goles_local: golesLocal,
@@ -114,61 +104,90 @@ export default function AdminResultadosPage() {
         goles_shootout_visita: golesLocal === golesVisita ? golesShootoutVisita : 0
       }).eq('id', partidoSeleccionado.id)
 
-      // 2. GUARDAR ESTADÍSTICAS INDIVIDUALES
-      const todasLasStats = [...jugadoresLocal, ...jugadoresVisita].map(j => {
-        const jStats = stats[j.id] || {}
+      // 2. PROCESAR ESTADÍSTICAS Y SANCIONES (TRIBUNAL)
+      const todasLasStats: any[] = []
+      const todosLosJugadores = [...jugadoresLocal, ...jugadoresVisita]
+
+      for (const j of todosLosJugadores) {
+        const jStat = stats[j.id] || {}
+        const amarillasHoy = jStat.amarillas || 0
+        const azulesHoy = jStat.azules || 0
+        
         let recibidos = 0
         if (j.id === porteroLocalId) recibidos = golesVisita 
         if (j.id === porteroVisitaId) recibidos = golesLocal 
 
-        return {
-          partido_id: partidoSeleccionado.id,
-          jugador_id: j.id,
-          equipo_id: j.id_equipo,
-          goles: jStats.goles || 0,
-          asistencias: jStats.asistencias || 0,
-          amarillas: jStats.amarillas || 0,
-          azules: jStats.azules || 0,
-          calificacion: jStats.calificacion || 0.00,
-          goles_recibidos: recibidos
+        // Si hizo algo, lo metemos a la tabla de stats
+        if (jStat.goles > 0 || jStat.asistencias > 0 || amarillasHoy > 0 || azulesHoy > 0 || jStat.calificacion > 0 || recibidos > 0) {
+          todasLasStats.push({
+            partido_id: partidoSeleccionado.id,
+            jugador_id: j.id,
+            equipo_id: j.id_equipo,
+            goles: jStat.goles || 0,
+            asistencias: jStat.asistencias || 0,
+            amarillas: amarillasHoy,
+            azules: azulesHoy,
+            calificacion: jStat.calificacion || 0.00,
+            goles_recibidos: recibidos
+          })
+
+          // --- LÓGICA DE SANCIONES ---
+          let acumAmarillas = (j.amarillas_acumuladas || 0) + amarillasHoy
+          let suspension = j.partidos_suspension || 0
+
+          // Regla: Azul o Doble Amarilla = +1 partido
+          if (azulesHoy > 0 || amarillasHoy >= 2) {
+            suspension += 1
+          }
+
+          // Regla: Acumulación de 3 amarillas = +1 partido y reset
+          if (acumAmarillas >= 3) {
+            suspension += 1
+            acumAmarillas = 0
+          }
+
+          // Actualizamos al jugador con su nuevo estado disciplinario
+          await supabase.from('jugadores').update({
+            amarillas_acumuladas: acumAmarillas,
+            partidos_suspension: suspension
+          }).eq('id', j.id)
+        } else {
+          // Si NO jugó (no tiene stats) pero tenía una suspensión pendiente, le descontamos un partido
+          if (j.partidos_suspension > 0) {
+            await supabase.from('jugadores').update({
+              partidos_suspension: j.partidos_suspension - 1
+            }).eq('id', j.id)
+          }
         }
-      }).filter(s => s.goles > 0 || s.asistencias > 0 || s.amarillas > 0 || s.azules > 0 || s.calificacion > 0 || s.goles_recibidos > 0)
+      }
 
       if (todasLasStats.length > 0) {
         await supabase.from('estadisticas_jugadores').insert(todasLasStats)
       }
 
-      // 3. 🎰 MOTOR DE APUESTAS (Se basa en el resultado del tiempo regular)
+      // 3. MOTOR DE APUESTAS (Simplificado para el ejemplo)
       let resultadoReal = 'EMPATE'
       if (golesLocal > golesVisita) resultadoReal = 'LOCAL'
       else if (golesVisita > golesLocal) resultadoReal = 'VISITA'
 
       const { data: apuestas } = await supabase.from('apuestas').select('*').eq('partido_id', partidoSeleccionado.id).eq('estado', 'pendiente')
-
-      if (apuestas && apuestas.length > 0) {
+      if (apuestas) {
         for (const apuesta of apuestas) {
-          if (apuesta.seleccion === resultadoReal) {
-            if (!apuesta.es_parlay) {
-              await supabase.from('apuestas').update({ estado: 'ganada' }).eq('id', apuesta.id)
-              const premio = apuesta.monto * apuesta.momio
-              const { data: perfil } = await supabase.from('perfiles_presidentes').select('saldo_bet').eq('id', apuesta.user_id).single()
-              if (perfil) await supabase.from('perfiles_presidentes').update({ saldo_bet: perfil.saldo_bet + premio }).eq('id', apuesta.user_id)
-            } else {
-              await supabase.from('apuestas').update({ estado: 'ganada' }).eq('id', apuesta.id)
-            }
-          } else {
-            await supabase.from('apuestas').update({ estado: 'perdida' }).eq('id', apuesta.id)
-            if (apuesta.es_parlay) await supabase.from('apuestas').update({ estado: 'perdida' }).eq('parlay_id', apuesta.parlay_id)
+          const gano = apuesta.seleccion === resultadoReal
+          await supabase.from('apuestas').update({ estado: gano ? 'ganada' : 'perdida' }).eq('id', apuesta.id)
+          if (gano && !apuesta.es_parlay) {
+            const { data: p } = await supabase.from('perfiles_presidentes').select('saldo_bet').eq('id', apuesta.user_id).single()
+            if (p) await supabase.from('perfiles_presidentes').update({ saldo_bet: p.saldo_bet + (apuesta.monto * apuesta.momio) }).eq('id', apuesta.user_id)
           }
         }
       }
 
-      alert('¡Partido procesado! Estadísticas, Tabla General y Apuestas actualizadas. 🏆')
+      alert('¡Partido procesado y sanciones aplicadas! ⚖️')
       setPartidoSeleccionado(null)
       fetchPartidosPendientes()
 
     } catch (error: any) {
-      alert('Error en el servidor: ' + error.message)
+      alert('Error: ' + error.message)
     }
     setGuardando(false)
   }
@@ -219,11 +238,10 @@ export default function AdminResultadosPage() {
                 </div>
               ))}
             </div>
-            {partidosFiltrados.length === 0 && <p className="text-center text-zinc-600 font-bold uppercase mt-10">No hay partidos en esta jornada.</p>}
           </div>
         ) : (
           <div className="space-y-8 animate-in fade-in zoom-in-95 duration-300">
-            {/* CABECERA DEL PARTIDO Y MARCADOR */}
+            {/* CABECERA Y MARCADOR */}
             <div className="bg-[#141414] border-2 border-[#fcc200]/20 rounded-[3rem] p-8 md:p-12 shadow-2xl">
               <div className="flex flex-col items-center mb-6">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#fcc200] mb-2 bg-[#fcc200]/10 px-4 py-1 rounded-full border border-[#fcc200]/20">Jornada {partidoSeleccionado.jornada}</span>
@@ -257,7 +275,7 @@ export default function AdminResultadosPage() {
                 </div>
               </div>
 
-              {/* 🔥 PANEL DE SHOOTOUTS: Solo aparece si hay empate en el marcador */}
+              {/* SHOOTOUTS PANEL */}
               {golesLocal === golesVisita && (
                 <div className="w-full mt-10 pt-8 border-t border-white/5 flex flex-col items-center animate-in fade-in slide-in-from-top-4">
                   <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#fcc200] mb-6 flex items-center gap-2">

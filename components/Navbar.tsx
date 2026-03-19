@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Settings, LayoutDashboard, LogOut, Ticket } from 'lucide-react'
+import { Menu, X, Settings, LayoutDashboard, LogOut, Twitter, MessageSquare } from 'lucide-react'
 import { useAuth } from '@/app/context/AuthContext'
 import { supabase } from '@/app/lib/supabase'
 
@@ -13,13 +13,12 @@ export default function Navbar() {
   const { user, loading } = useAuth()
   const router = useRouter()
   
-  // 🔗 LISTA DE ENLACES ACTUALIZADA
   const links = [
     { name: 'Calendario', href: '/partidos' },
     { name: 'Posiciones', href: '/clasificacion' },
     { name: 'Estadísticas', href: '/estadisticas' },
-    { name: 'Clubes', href: '/clubes' }, // Nueva sección de equipos
-    { name: 'BET-ALV', href: '/bet-alv' }, // La zona de apuestas
+    { name: 'Clubes', href: '/clubes' },
+    { name: 'BET-ALV', href: '/bet-alv' },
   ]
 
   const isAdmin = user?.email === 'garcca29@gmail.com'
@@ -70,6 +69,16 @@ export default function Navbar() {
             {link.name}
           </Link>
         ))}
+
+        {/* 🔗 REDES SOCIALES DESKTOP */}
+        <div className="flex items-center gap-4 ml-4 border-l border-white/10 pl-6">
+          <a href="https://x.com/PlebeiansLeague" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+            <Twitter size={16} />
+          </a>
+          <a href="https://discord.gg/fPBxSdXCWt" target="_blank" rel="noopener noreferrer" className="hover:text-[#5865F2] transition-colors">
+            <MessageSquare size={16} />
+          </a>
+        </div>
 
         <div className="flex items-center gap-4 ml-4">
           {isAdmin && (
@@ -133,6 +142,16 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
+
+            {/* 🔗 REDES SOCIALES MOBILE */}
+            <div className="flex gap-8 py-4 border-y border-white/5 justify-center">
+              <a href="https://x.com/PlebeiansLeague" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-[#fcc200]">
+                <Twitter size={24} />
+              </a>
+              <a href="https://discord.gg/fPBxSdXCWt" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-[#5865F2]">
+                <MessageSquare size={24} />
+              </a>
+            </div>
 
             {user && perfil?.equipos ? (
               <>

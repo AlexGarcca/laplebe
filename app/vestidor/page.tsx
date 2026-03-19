@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShieldCheck, Users, LayoutDashboard, ChevronRight, Clock } from 'lucide-react'
+import { ShieldCheck, Users, LayoutDashboard, ChevronRight, Clock, ShieldAlert, AlertTriangle } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 
 export default function VestidorPage() {
@@ -38,6 +38,7 @@ export default function VestidorPage() {
       setPerfil(pData)
       setEquipo(pData.equipos)
       
+      // Traemos todo: incluyendo amarillas_acumuladas y partidos_suspension
       const { data: jugs } = await supabase.from('jugadores').select('*').eq('id_equipo', pData.equipo_id).order('nombre')
       setJugadores(jugs || [])
       
@@ -50,7 +51,7 @@ export default function VestidorPage() {
         .limit(1)
         .maybeSingle()
 
-      if (partido) {
+        if (partido) {
           setProximoPartido(partido)
           setRival(partido.equipo_local_id === pData.equipo_id ? partido.visita.nombre : partido.local.nombre)
       }
@@ -87,14 +88,15 @@ export default function VestidorPage() {
 
   const handleConfirm = async () => {
     if (!proximoPartido?.id) return alert('No hay partido activo.');
-    const fechaPartido = new Date(proximoPartido.fecha);
-    const limiteEnvio = new Date(fechaPartido);
-    const diaSemana = fechaPartido.getDay(); 
-    const diasARestar = diaSemana === 0 ? 4 : diaSemana - 3;
-    limiteEnvio.setDate(fechaPartido.getDate() - diasARestar);
-    limiteEnvio.setHours(23, 59, 59, 999);
+    
+    // Validación de seguridad: Que no haya seleccionado a un castigado (by-pass de HTML)
+    const seleccionadosIds = Object.values(formacion);
+    const hayCastigados = jugadores.filter(j => seleccionadosIds.includes(j.id) && j.partidos_suspension > 0);
+    
+    if (hayCastigados.length > 0) {
+      return alert(`❌ ERROR: ${hayCastigados[0].nombre} está suspendido y no puede jugar.`);
+    }
 
-    if (new Date() > limiteEnvio) return alert(`❌ PLAZO VENCIDO.`);
     if (Object.values(formacion).some(v => v === '')) return alert('¡Completa el cuadro!');
 
     setEnviando(true);
@@ -110,22 +112,11 @@ export default function VestidorPage() {
     });
 
     if (error) alert('Error: ' + error.message);
-    else alert(`✅ ¡Alineación blindada!`);
+    else alert(`✅ ¡Alineación blindada para enfrentar a ${rival}!`);
     setEnviando(false);
   };
 
   if (!perfil) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center font-black tracking-[0.5em] text-[#fcc200] animate-pulse">SINCRONIZANDO...</div>
-
-  if (!perfil.aprobado) return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-20 h-20 bg-[#fcc200]/10 rounded-full flex items-center justify-center mb-6 animate-pulse">
-        <ShieldCheck size={40} className="text-[#fcc200]" />
-      </div>
-      <h2 className="text-2xl font-black uppercase italic text-white mb-2 text-balance">Acceso en Revisión</h2>
-      <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest max-w-xs">Tu cuenta ha sido creada. El Admin debe asignarte un equipo para entrar al vestidor.</p>
-      <button onClick={() => supabase.auth.signOut().then(() => router.push('/login'))} className="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 hover:text-white transition-all cursor-pointer">Cerrar Sesión</button>
-    </div>
-  )
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans pb-20">
@@ -164,53 +155,117 @@ export default function VestidorPage() {
                   <div className="absolute top-1/2 left-0 w-full h-px bg-white/20" />
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-48 h-20 border-t border-x border-white/20" />
                 </div>
+                
+                {/* JUGADORES DE CAMPO */}
                 <div className="relative z-10 flex justify-between items-center w-full px-2 mb-8">
-                  {[1, 2, 3, 4].map(n => (
-                    <div key={n} className="w-[23%] max-w-30 group">
+                  {['j1', 'j2', 'j3', 'j4'].map((pos, idx) => (
+                    <div key={pos} className="w-[23%] max-w-30 group">
                       <div className="relative aspect-square bg-zinc-900/90 rounded-xl border border-white/10 group-hover:border-[#fcc200]/50 transition-all flex flex-col items-center justify-center backdrop-blur-sm cursor-pointer">
-                        <span className="text-[7px] font-black text-zinc-500 absolute top-1.5 uppercase">J{n}</span>
-                        <select className="w-full h-full bg-transparent text-[9px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none z-10 pt-2 px-1" onChange={(e) => setFormacion({...formacion, [`j${n}`]: e.target.value})} value={formacion[`j${n}` as keyof typeof formacion]}>
+                        <span className="text-[7px] font-black text-zinc-500 absolute top-1.5 uppercase">J{idx + 1}</span>
+                        <select 
+                          className="w-full h-full bg-transparent text-[9px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none z-10 pt-2 px-1" 
+                          onChange={(e) => setFormacion({...formacion, [pos]: e.target.value})} 
+                          value={formacion[pos as keyof typeof formacion]}
+                        >
                           <option value="" className="bg-black text-zinc-600">+</option>
-                          {jugadores.map(j => <option key={j.id} value={j.id} className="bg-black text-white">{j.nombre}</option>)}
+                          {jugadores.map(j => (
+                            <option 
+                              key={j.id} 
+                              value={j.id} 
+                              disabled={j.partidos_suspension > 0}
+                              className={`bg-black ${j.partidos_suspension > 0 ? 'text-zinc-700' : 'text-white'}`}
+                            >
+                              {j.nombre} {j.partidos_suspension > 0 ? '🚫' : ''}
+                            </option>
+                          ))}
                         </select>
-                        {!formacion[`j${n}` as keyof typeof formacion] && <span className="text-zinc-700 text-lg absolute pointer-events-none mt-2">+</span>}
+                        {!formacion[pos as keyof typeof formacion] && <span className="text-zinc-700 text-lg absolute pointer-events-none mt-2">+</span>}
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {/* PORTERO */}
                 <div className="relative z-10 flex justify-center w-full">
                   <div className="w-[25%] max-w-32.5 group">
                     <div className="relative aspect-square bg-[#fcc200]/5 rounded-xl border-2 border-[#fcc200]/20 group-hover:border-[#fcc200] transition-all flex flex-col items-center justify-center backdrop-blur-md cursor-pointer">
-                      <select className="w-full h-full bg-transparent text-[9px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none text-[#fcc200] z-10 pt-2 px-1" onChange={(e) => setFormacion({...formacion, po: e.target.value})} value={formacion.po}>
+                      <select 
+                        className="w-full h-full bg-transparent text-[9px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none text-[#fcc200] z-10 pt-2 px-1" 
+                        onChange={(e) => setFormacion({...formacion, po: e.target.value})} 
+                        value={formacion.po}
+                      >
                         <option value="" className="bg-black text-[#fcc200]">GK</option>
-                        {jugadores.map(j => <option key={j.id} value={j.id} className="bg-black text-white">{j.nombre}</option>)}
+                        {jugadores.map(j => (
+                          <option 
+                            key={j.id} 
+                            value={j.id} 
+                            disabled={j.partidos_suspension > 0}
+                            className={`bg-black ${j.partidos_suspension > 0 ? 'text-zinc-700' : 'text-white'}`}
+                          >
+                            {j.nombre} {j.partidos_suspension > 0 ? '🚫' : ''}
+                          </option>
+                        ))}
                       </select>
                       {!formacion.po && <span className="text-[#fcc200]/40 text-lg absolute pointer-events-none mt-2">+</span>}
                     </div>
                   </div>
                 </div>
               </div>
-              <button onClick={handleConfirm} disabled={enviando || !proximoPartido || tiempoRestante === "VESTIDOR CERRADO 🔒"} className="mt-8 w-full py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-30 shadow-xl shadow-[#fcc200]/10 flex items-center justify-center gap-3 cursor-pointer">
+              <button 
+                onClick={handleConfirm} 
+                disabled={enviando || !proximoPartido || tiempoRestante === "VESTIDOR CERRADO 🔒"} 
+                className="mt-8 w-full py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-30 shadow-xl shadow-[#fcc200]/10 flex items-center justify-center gap-3 cursor-pointer"
+              >
                 <ShieldCheck size={20} />{enviando ? 'ENVIANDO...' : 'CONFIRMAR TITULARES'}
               </button>
             </div>
           </div>
+
+          {/* SIDEBAR DE PLANTILLA */}
           <div className="lg:col-span-4">
             <div className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-6 md:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <Users size={18} className="text-zinc-500" />
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Plantilla Disponible</h4>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Estado de Plantilla</h4>
               </div>
-              <div className="space-y-2 max-h-100 md:max-h-150 overflow-y-auto pr-2 custom-scrollbar">
-                {jugadores.map(j => (
-                  <div key={j.id} className="flex items-center justify-between p-3 rounded-xl bg-white/2 border border-white/5 group hover:border-[#fcc200]/20 transition-all cursor-default">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-[8px] font-black text-zinc-600 group-hover:text-[#fcc200]">{j.posicion}</div>
-                      <span className="text-[11px] font-bold uppercase tracking-tight text-zinc-300">{j.nombre}</span>
+              <div className="space-y-3 max-h-100 md:max-h-150 overflow-y-auto pr-2 custom-scrollbar">
+                {jugadores.map(j => {
+                  const suspendido = j.partidos_suspension > 0;
+                  const riesgoAmarillas = j.amarillas_acumuladas >= 2;
+
+                  return (
+                    <div 
+                      key={j.id} 
+                      className={`flex flex-col p-3 rounded-2xl border transition-all ${suspendido ? 'bg-black/40 border-rose-500/20 opacity-60' : 'bg-white/2 border-white/5 group hover:border-[#fcc200]/20'}`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[8px] font-black ${suspendido ? 'bg-rose-500/10 text-rose-500' : 'bg-black text-zinc-600 group-hover:text-[#fcc200]'}`}>
+                            {j.posicion}
+                          </div>
+                          <span className={`text-[11px] font-bold uppercase tracking-tight ${suspendido ? 'text-zinc-500 italic line-through' : 'text-zinc-300'}`}>
+                            {j.nombre}
+                          </span>
+                        </div>
+                        {suspendido && <ShieldAlert size={14} className="text-rose-500 animate-pulse" />}
+                        {riesgoAmarillas && !suspendido && <AlertTriangle size={14} className="text-amber-500" />}
+                      </div>
+
+                      {/* BADGES DE ESTADO */}
+                      <div className="flex gap-2 pl-11">
+                         {suspendido && (
+                           <span className="text-[7px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                             SUSPENDIDO: {j.partidos_suspension} JUEGO(S)
+                           </span>
+                         )}
+                         <div className="flex items-center gap-1">
+                            <div className={`w-1.5 h-2 rounded-sm ${j.amarillas_acumuladas > 0 ? 'bg-amber-500' : 'bg-zinc-800'}`}></div>
+                            <span className="text-[7px] font-bold text-zinc-600 uppercase">{j.amarillas_acumuladas}/3 AMARILLAS</span>
+                         </div>
+                      </div>
                     </div>
-                    <ChevronRight size={14} className="text-zinc-800" />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

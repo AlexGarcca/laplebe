@@ -3,15 +3,15 @@ import { supabase } from './lib/supabase'
 import MatchTicker from '@/components/MatchTicker'
 import HallOfFame from '@/components/HallOfFame'
 import Navbar from '@/components/Navbar'
+import Sponsors from '@/components/Sponsors' // 🔥 IMPORTADO
 import { FadeInUp, StaggeredGrid, GridItem } from '@/components/AnimatedWrappers'
 import { Metadata } from 'next'
 
-// 🔥 CONFIGURACIÓN DE PESTAÑA (Metadata)
 export const metadata: Metadata = {
   title: 'Plebeians League | Split 3',
   description: 'La Liga de los Plebeyos - Sitio Oficial',
   icons: {
-    icon: '/icon.png?v=1', // Recuerda renombrar tu logo a icon.png en public/
+    icon: '/icon.png?v=1',
   },
 }
 
@@ -35,7 +35,6 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans selection:bg-[#fcc200]/30">
       
-      {/* NAVBAR RESPONSIVO (Ya no es estático) */}
       <Navbar />
 
       <div className="overflow-x-hidden">
@@ -49,7 +48,6 @@ export default async function Home() {
               className="w-full h-full object-cover opacity-40 scale-105" 
               alt="Banner" 
             />
-            {/* Corregido: gradient-to-b es el estándar de Tailwind */}
             <div className="absolute inset-0 bg-linear-to-b from-[#0a0a0a] via-transparent to-[#0a0a0a]"></div>
             <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
           </div>
@@ -112,6 +110,10 @@ export default async function Home() {
               </div>
             </FadeInUp>
           </section>
+
+          {/* 🔥 SECCIÓN DE PATROCINADORES AGREGADA AL FINAL */}
+          <Sponsors />
+          
         </main>
       </div>
     </div>
