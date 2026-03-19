@@ -35,7 +35,7 @@ export default function Sponsors() {
           {/* GRID DE SOCIOSsossos */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-y-16 gap-x-8 items-end justify-items-center">
             
-            {/* TECHNICAL PARTNER */}
+            {/* TECHNICAL PARTNERrs */}
             <div className="flex flex-col items-center gap-5">
               <img src={sponsors.technical.logo} alt={sponsors.technical.name} className="h-12 md:h-16 lg:h-18 w-auto object-contain opacity-80 hover:opacity-100 hover:scale-105 transition-all" />
               <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600 text-center">{sponsors.technical.label}</span>
