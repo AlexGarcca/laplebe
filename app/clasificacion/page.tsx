@@ -143,7 +143,7 @@ export default function ClasificacionPage() {
                 {tabla.map((equipo, index) => {
                   const isLider = index === 0;
                   const isLiguilla = index >= 1 && index <= 7;
-                  const isZonaRiesgo = index >= tabla.length - 2;
+                  const isZonaRiesgo = index >= Math.max(tabla.length - 4, 0);
 
                   return (
                     <motion.tr 
