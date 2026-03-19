@@ -7,6 +7,15 @@ import Navbar from '@/components/Navbar'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link' // <-- IMPORTANTE: Agregamos Link
 
+const ADMIN_USER_IDS = new Set([
+  '09c83b94-132f-4711-8009-0aa427d8df84',
+])
+
+const ADMIN_EMAILS = new Set([
+  'garcca29@gmail.com',
+  'sanchez_24399@hotmail.com',
+])
+
 export default function AdminPage() {
   const router = useRouter()
   const [pendientes, setPendientes] = useState<any[]>([])
@@ -18,7 +27,10 @@ export default function AdminPage() {
       const { data: { user } } = await supabase.auth.getUser()
 
       // VALIDACIÓN DE ADMIN
-      if (user?.email !== 'garcca29@gmail.com') {
+      const email = user?.email?.toLowerCase() || ''
+      const isAdmin = !!user && (ADMIN_USER_IDS.has(user.id) || ADMIN_EMAILS.has(email))
+
+      if (!isAdmin) {
         router.push('/')
         return
       }

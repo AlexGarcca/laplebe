@@ -5,7 +5,14 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import { Save, ChevronRight, Loader2, Shield, Activity } from 'lucide-react'
 
-const ADMIN_EMAIL = 'garcca29@gmail.com'
+const ADMIN_USER_IDS = new Set([
+  '09c83b94-132f-4711-8009-0aa427d8df84',
+])
+
+const ADMIN_EMAILS = new Set([
+  'garcca29@gmail.com',
+  'sanchez_24399@hotmail.com',
+])
 
 export default function AdminResultadosPage() {
   const [partidos, setPartidos] = useState<any[]>([])
@@ -34,8 +41,15 @@ export default function AdminResultadosPage() {
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user?.email?.toLowerCase() !== ADMIN_EMAIL) router.push('/')
-      else fetchPartidosPendientes()
+      const email = user?.email?.toLowerCase() || ''
+      const isAdmin = !!user && (ADMIN_USER_IDS.has(user.id) || ADMIN_EMAILS.has(email))
+
+      if (!isAdmin) {
+        router.push('/')
+        return
+      }
+
+      fetchPartidosPendientes()
     }
     checkAdmin()
   }, [router])

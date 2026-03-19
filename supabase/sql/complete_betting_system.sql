@@ -109,7 +109,16 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 AS $$
-  SELECT COALESCE((auth.jwt() ->> 'email') = 'garcca29@gmail.com', false);
+  SELECT COALESCE(
+    auth.uid() IN (
+      '09c83b94-132f-4711-8009-0aa427d8df84'::uuid
+    )
+    OR lower(auth.jwt() ->> 'email') IN (
+      'garcca29@gmail.com',
+      'sanchez_24399@hotmail.com'
+    ),
+    false
+  );
 $$;
 
 GRANT EXECUTE ON FUNCTION public.is_super_admin TO authenticated;
@@ -633,8 +642,7 @@ BEGIN
     RAISE EXCEPTION 'No autenticado' USING ERRCODE = '42501';
   END IF;
 
-  v_email := COALESCE(auth.jwt() ->> 'email', '');
-  IF v_email != 'garcca29@gmail.com' THEN
+  IF NOT public.is_super_admin() THEN
     RAISE EXCEPTION 'Solo administrador autorizado puede liquidar apuestas' USING ERRCODE = '42501';
   END IF;
 

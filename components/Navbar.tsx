@@ -7,6 +7,15 @@ import { Menu, X, Settings, LayoutDashboard, LogOut, Twitter, MessageSquare } fr
 import { useAuth } from '@/app/context/AuthContext'
 import { supabase } from '@/app/lib/supabase'
 
+const ADMIN_USER_IDS = new Set([
+  '09c83b94-132f-4711-8009-0aa427d8df84',
+])
+
+const ADMIN_EMAILS = new Set([
+  'garcca29@gmail.com',
+  'sanchez_24399@hotmail.com',
+])
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [perfil, setPerfil] = useState<any>(null)
@@ -21,7 +30,8 @@ export default function Navbar() {
     { name: 'BET-ALV', href: '/bet-alv' },
   ]
 
-  const isAdmin = user?.email === 'garcca29@gmail.com'
+  const userEmail = user?.email?.toLowerCase() || ''
+  const isAdmin = !!user && (ADMIN_USER_IDS.has(user.id) || ADMIN_EMAILS.has(userEmail))
 
   useEffect(() => {
     const fetchPerfil = async () => {
