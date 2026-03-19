@@ -42,15 +42,15 @@ export default function HallOfFame() {
   ]
 
   return (
-    <section className="py-20 px-6">
-      <div className="max-w-6xl mx-auto text-center mb-16">
-        <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
+    <section className="py-14 sm:py-20 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto text-center mb-12 sm:mb-16">
+        <h2 className="text-3xl sm:text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
           Salón de la <span className="text-[#fcc200]">Fama</span>
         </h2>
-        <p className="text-zinc-500 uppercase tracking-[0.4em] text-[10px] font-bold mt-4">Los mejores del 3er Split</p>
+        <p className="text-zinc-500 uppercase tracking-[0.3em] sm:tracking-[0.4em] text-[9px] sm:text-[10px] font-bold mt-4">Los mejores del 3er Split</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
         {cards.map((card, i) => (
           <motion.div
             key={i}
@@ -60,9 +60,9 @@ export default function HallOfFame() {
             className="relative group cursor-pointer"
           >
             <div className={`absolute -inset-1 bg-linear-to-b ${card.color} to-transparent opacity-20 group-hover:opacity-40 blur transition rounded-[3rem]`} />
-            <div className="relative bg-[#141414] border border-white/5 rounded-[3rem] p-10 flex flex-col items-center shadow-2xl overflow-hidden">
+            <div className="relative bg-[#141414] border border-white/5 rounded-[2.2rem] sm:rounded-[3rem] p-6 sm:p-8 md:p-10 flex flex-col items-center shadow-2xl overflow-hidden">
               
-              <div className="absolute top-6 right-8 text-4xl font-black italic text-white/5 uppercase">#{i+1}</div>
+              <div className="absolute top-5 right-6 sm:top-6 sm:right-8 text-3xl sm:text-4xl font-black italic text-white/5 uppercase">#{i+1}</div>
               
               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-6">{card.title}</span>
               

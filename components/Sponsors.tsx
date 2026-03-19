@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { FadeInUp } from './AnimatedWrappers'
 
@@ -15,37 +16,62 @@ const sponsors = {
 
 export default function Sponsors() {
   return (
-    <section className="w-full bg-[#0a0a0a] py-32 border-t border-white/5 relative overflow-hidden">
+    <section className="w-full bg-[#0a0a0a] py-16 md:py-28 border-t border-white/5 relative overflow-hidden">
       {/* Resplandor de fondo sutil */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[#fcc200]/5 blur-[120px] rounded-full pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <FadeInUp>
           {/* TITLE PARTNER */}
-          <div className="flex flex-col items-center mb-24">
+          <div className="flex flex-col items-center mb-14 md:mb-20">
             <motion.div 
               whileHover={{ scale: 1.05 }}
-              className="flex flex-col items-center gap-6"
+              className="w-full max-w-195 flex flex-col items-center gap-4 md:gap-6"
             >
-              <img src={sponsors.title.logo} alt={sponsors.title.name} className="h-18 md:h-24 lg:h-28 w-auto object-contain opacity-95 drop-shadow-[0_0_20px_rgba(252,194,0,0.08)]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 italic ml-2">{sponsors.title.label}</span>
+              <div className="relative w-full aspect-16/8 sm:aspect-16/7">
+                <Image
+                  src={sponsors.title.logo}
+                  alt={sponsors.title.name}
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 780px"
+                  className="object-cover opacity-95 drop-shadow-[0_0_20px_rgba(252,194,0,0.08)]"
+                />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.42em] sm:tracking-[0.5em] text-zinc-500 italic text-center">{sponsors.title.label}</span>
             </motion.div>
           </div>
 
           {/* GRID DE SOCIOSsossos */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-y-16 gap-x-8 items-end justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-y-10 sm:gap-y-12 gap-x-6 md:gap-x-8 items-end justify-items-center">
             
             {/* TECHNICAL PARTNERrs */}
-            <div className="flex flex-col items-center gap-5">
-              <img src={sponsors.technical.logo} alt={sponsors.technical.name} className="h-12 md:h-16 lg:h-18 w-auto object-contain opacity-80 hover:opacity-100 hover:scale-105 transition-all" />
-              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600 text-center">{sponsors.technical.label}</span>
+            <div className="w-full max-w-95 flex flex-col items-center gap-4">
+              <div className="relative w-full aspect-16/8 sm:aspect-16/7">
+                <Image
+                  src={sponsors.technical.logo}
+                  alt={sponsors.technical.name}
+                  fill
+                  sizes="(max-width: 640px) 95vw, (max-width: 1024px) 45vw, 18vw"
+                  className="object-cover opacity-85 hover:opacity-100 hover:scale-[1.02] transition-all duration-300"
+                />
+              </div>
+              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.32em] text-zinc-600 text-center">{sponsors.technical.label}</span>
             </div>
 
             {/* RESTO DE PARTNERS */}
             {sponsors.others.map((s, i) => (
-              <div key={i} className="flex flex-col items-center gap-5">
-                <img src={s.logo} alt={s.name} className="h-12 md:h-16 lg:h-18 w-auto object-contain opacity-80 hover:opacity-100 hover:scale-105 transition-all" />
-                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600 text-center">{s.label}</span>
+              <div key={i} className="w-full max-w-95 flex flex-col items-center gap-4">
+                <div className="relative w-full aspect-16/8 sm:aspect-16/7">
+                  <Image
+                    src={s.logo}
+                    alt={s.name}
+                    fill
+                    sizes="(max-width: 640px) 95vw, (max-width: 1024px) 45vw, 18vw"
+                    className="object-cover opacity-85 hover:opacity-100 hover:scale-[1.02] transition-all duration-300"
+                  />
+                </div>
+                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.32em] text-zinc-600 text-center">{s.label}</span>
               </div>
             ))}
           </div>

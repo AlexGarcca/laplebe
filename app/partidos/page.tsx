@@ -38,10 +38,10 @@ export default function CalendarioPage() {
       <Navbar />
       <MatchTicker />
 
-      <main className="max-w-4xl mx-auto p-4 md:p-12 md:py-20">
+      <main className="max-w-4xl mx-auto p-4 sm:p-6 md:p-12 md:py-20">
         <header className="mb-12 text-center">
           <FadeInUp>
-            <h1 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-4">
+            <h1 className="text-3xl sm:text-5xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-4 leading-tight">
               Calendario <span className="text-[#fcc200]">Plebe</span>
             </h1>
             <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em]">Temporada 2026 • Split 3</p>
@@ -96,7 +96,7 @@ export default function CalendarioPage() {
                         
                         {/* LOCAL */}
                         <div className="flex items-center justify-end gap-2 md:gap-4 text-right">
-                          <span className={`text-[10px] md:text-lg font-black uppercase italic tracking-tighter transition-colors leading-tight ${localGana ? 'text-white' : 'text-zinc-500'}`}>
+                          <span className={`text-[11px] md:text-lg font-black uppercase italic tracking-tighter transition-colors leading-tight ${localGana ? 'text-white' : 'text-zinc-500'}`}>
                             {partido.local?.nombre}
                           </span>
                           <div className={`relative ${localGana ? 'scale-110' : 'opacity-50 scale-90'} transition-all`}>
@@ -127,7 +127,7 @@ export default function CalendarioPage() {
                             <img src={partido.visita?.escudo_url} className="w-10 h-10 md:w-16 md:h-16 object-contain" alt="" />
                             {visitaGana && <div className="absolute -inset-1 bg-[#fcc200]/20 blur-xl rounded-full -z-10" />}
                           </div>
-                          <span className={`text-[10px] md:text-lg font-black uppercase italic tracking-tighter transition-colors leading-tight ${visitaGana ? 'text-white' : 'text-zinc-500'}`}>
+                          <span className={`text-[11px] md:text-lg font-black uppercase italic tracking-tighter transition-colors leading-tight ${visitaGana ? 'text-white' : 'text-zinc-500'}`}>
                             {partido.visita?.nombre}
                           </span>
                         </div>

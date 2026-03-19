@@ -138,10 +138,10 @@ export default function EstadisticasPage() {
       <Navbar />
       <MatchTicker />
 
-      <main className="max-w-5xl mx-auto p-6 md:p-8 md:py-20">
+      <main className="max-w-5xl mx-auto p-4 sm:p-6 md:p-8 md:py-20">
         <header className="mb-12 text-center">
           <FadeInUp>
-            <h1 className="text-4xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-6 leading-none">
+            <h1 className="text-3xl sm:text-4xl md:text-8xl font-black uppercase italic tracking-tighter text-white mb-6 leading-none">
               Líderes del <span className="text-[#fcc200]">Torneo</span>
             </h1>
             
@@ -150,7 +150,7 @@ export default function EstadisticasPage() {
                 <button 
                   key={tab} 
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-none px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-[#fcc200] text-black shadow-xl scale-105' : 'bg-[#141414] text-zinc-500 border border-white/5 hover:text-white'}`}
+                  className={`flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-[#fcc200] text-black shadow-xl scale-105' : 'bg-[#141414] text-zinc-500 border border-white/5 hover:text-white'}`}
                 >
                   {tab === 'porteros' ? 'GUANTE ORO' : tab === 'tarjetas' ? 'FAIR PLAY' : tab}
                 </button>
@@ -167,27 +167,27 @@ export default function EstadisticasPage() {
               <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 border border-white/5 rounded-[2.5rem] bg-[#141414] text-zinc-600 font-bold uppercase italic">Sin datos registrados en esta categoría.</motion.div>
             ) : activeTab === 'tarjetas' ? (
               <motion.div key="fairplay" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="overflow-x-auto bg-[#141414] border border-white/5 rounded-[2.5rem] shadow-2xl">
-                <table className="w-full text-left min-w-125">
+                <table className="w-full text-left min-w-140">
                   <thead className="bg-black/40 text-[9px] uppercase font-black tracking-widest text-zinc-500">
                     <tr>
-                      <th className="px-6 py-5">#</th>
-                      <th className="px-6 py-5">Equipo</th>
-                      <th className="px-6 py-5 text-center text-blue-500">Azules</th>
-                      <th className="px-6 py-5 text-center text-yellow-500">Amarillas</th>
+                      <th className="px-3 md:px-6 py-5">#</th>
+                      <th className="px-3 md:px-6 py-5">Equipo</th>
+                      <th className="px-3 md:px-6 py-5 text-center text-blue-500">Azules</th>
+                      <th className="px-3 md:px-6 py-5 text-center text-yellow-500">Amarillas</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {data.map((equipo, i) => (
                       <tr key={equipo.id} className="group hover:bg-white/2 transition-colors">
-                        <td className="px-6 py-5 font-black italic text-zinc-700 text-xl">#{i + 1}</td>
-                        <td className="px-6 py-5">
+                        <td className="px-3 md:px-6 py-5 font-black italic text-zinc-700 text-xl">#{i + 1}</td>
+                        <td className="px-3 md:px-6 py-5">
                           <div className="flex items-center gap-4">
                             <img src={equipo.escudo} className="w-8 h-8 object-contain" alt="" />
                             <span className="text-base font-black uppercase italic text-white group-hover:text-[#fcc200] transition-colors">{equipo.nombre}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-5 text-center text-xl font-black text-blue-500">{equipo.azules}</td>
-                        <td className="px-6 py-5 text-center text-xl font-black text-yellow-500">{equipo.amarillas}</td>
+                        <td className="px-3 md:px-6 py-5 text-center text-xl font-black text-blue-500">{equipo.azules}</td>
+                        <td className="px-3 md:px-6 py-5 text-center text-xl font-black text-yellow-500">{equipo.amarillas}</td>
                       </tr>
                     ))}
                   </tbody>

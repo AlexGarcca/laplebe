@@ -53,10 +53,10 @@ export default function MatchTicker() {
   }, [partidos])
 
   return (
-    <div className="bg-[#0a0a0a] border-b border-white/5 py-8 overflow-hidden selection:bg-transparent">
+    <div className="bg-[#0a0a0a] border-b border-white/5 py-6 md:py-8 overflow-hidden selection:bg-transparent">
       <motion.div 
         ref={carousel} 
-        className="cursor-grab active:cursor-grabbing px-12 overflow-hidden" 
+        className="cursor-grab active:cursor-grabbing px-4 sm:px-8 md:px-12 overflow-hidden" 
         whileTap={{ cursor: "grabbing" }}
       >
         <motion.div 
@@ -70,7 +70,7 @@ export default function MatchTicker() {
           {partidos.map((partido) => (
             <div 
               key={partido.id} 
-              className={`min-w-75 bg-[#141414] border rounded-[2.5rem] p-6 shadow-2xl pointer-events-none transition-colors ${
+              className={`min-w-[82vw] sm:min-w-75 bg-[#141414] border rounded-[2.2rem] sm:rounded-[2.5rem] p-4 sm:p-6 shadow-2xl pointer-events-none transition-colors ${
                 partido.jugado ? 'border-white/5 opacity-70' : 'border-[#fcc200]/30'
               }`}
             >
@@ -86,7 +86,7 @@ export default function MatchTicker() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <img src={partido.local?.escudo_url} className="w-7 h-7 object-contain" alt="" />
-                    <span className={`text-xs font-black uppercase tracking-tight ${partido.jugado && partido.goles_local < partido.goles_visita ? 'text-zinc-600' : 'text-white'}`}>
+                    <span className={`text-[11px] sm:text-xs font-black uppercase tracking-tight ${partido.jugado && partido.goles_local < partido.goles_visita ? 'text-zinc-600' : 'text-white'}`}>
                       {partido.local?.nombre}
                     </span>
                   </div>
@@ -99,7 +99,7 @@ export default function MatchTicker() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <img src={partido.visita?.escudo_url} className="w-7 h-7 object-contain" alt="" />
-                    <span className={`text-xs font-black uppercase tracking-tight ${partido.jugado && partido.goles_visita < partido.goles_local ? 'text-zinc-600' : 'text-white'}`}>
+                    <span className={`text-[11px] sm:text-xs font-black uppercase tracking-tight ${partido.jugado && partido.goles_visita < partido.goles_local ? 'text-zinc-600' : 'text-white'}`}>
                       {partido.visita?.nombre}
                     </span>
                   </div>

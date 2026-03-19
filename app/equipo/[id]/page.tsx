@@ -50,7 +50,7 @@ export default function EquipoPage({ params }: { params: any }) {
       <Navbar />
 
       {/* HEADER DINÁMICO RESPONSIVO */}
-      <header className="relative w-full pt-16 md:pt-24 pb-12 md:pb-20 px-6 md:px-16 border-b border-white/5 overflow-hidden">
+      <header className="relative w-full pt-12 sm:pt-16 md:pt-24 pb-10 sm:pb-12 md:pb-20 px-4 sm:px-6 md:px-16 border-b border-white/5 overflow-hidden">
         {/* Fondo con el color del equipo */}
         <div 
           className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-10 md:opacity-20 pointer-events-none" 
@@ -62,17 +62,17 @@ export default function EquipoPage({ params }: { params: any }) {
             {/* Botón Volver - Ahora te regresa a la lista de clubes */}
             <Link 
               href="/clubes" 
-              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-white transition-all mb-12 group"
+              className="inline-flex items-center gap-2 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-zinc-500 hover:text-white transition-all mb-8 sm:mb-12 group"
             >
               <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
               Directorio de Clubes
             </Link>
 
-            <div className="flex flex-col md:flex-row items-center md:items-end gap-8 md:gap-12 text-center md:text-left">
-              <img src={equipo.escudo_url} className="w-32 h-32 md:w-48 md:h-48 object-contain brightness-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" alt="Logo" />
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-6 sm:gap-8 md:gap-12 text-center md:text-left">
+              <img src={equipo.escudo_url} className="w-26 h-26 sm:w-32 sm:h-32 md:w-48 md:h-48 object-contain brightness-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" alt="Logo" />
               <div className="flex-1">
                 <span className="inline-block px-4 py-1 bg-white/5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-[0.4em] text-zinc-500 border border-white/5 mb-6">Club Oficial • Plebeians League</span>
-                <h1 className="text-5xl md:text-9xl font-black uppercase italic tracking-tighter leading-none mb-6" style={{ color: colorEquipo }}>
+                <h1 className="text-4xl sm:text-6xl md:text-9xl font-black uppercase italic tracking-tighter leading-none mb-4 sm:mb-6" style={{ color: colorEquipo }}>
                   {equipo.nombre}
                 </h1>
                 <div className="flex flex-col md:flex-row md:items-center justify-center md:justify-start gap-4 md:gap-6 text-zinc-400">
@@ -86,7 +86,7 @@ export default function EquipoPage({ params }: { params: any }) {
         </FadeInUp>
       </header>
 
-      <main className="max-w-7xl mx-auto p-6 md:p-20">
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-20">
         <FadeInUp delay={0.2}>
           <div className="flex items-center gap-4 mb-12 md:mb-16">
             <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: colorEquipo }}></div>
@@ -109,7 +109,7 @@ export default function EquipoPage({ params }: { params: any }) {
 
               return (
                 <GridItem key={jugador.id}>
-                  <div className="group relative bg-[#141414] rounded-4xl md:rounded-[2.5rem] border border-white/5 p-6 md:p-8 flex flex-col transition-all duration-500 hover:bg-[#1a1a1a] hover:border-white/10 shadow-2xl overflow-hidden h-full cursor-default">
+                  <div className="group relative bg-[#141414] rounded-4xl md:rounded-[2.5rem] border border-white/5 p-5 md:p-8 flex flex-col transition-all duration-500 hover:bg-[#1a1a1a] hover:border-white/10 shadow-2xl overflow-hidden h-full cursor-default">
                     {/* Barra de color lateral dinámica */}
                     <div className="absolute top-0 right-0 w-1 h-full opacity-30 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: colorEspecial }}></div>
 

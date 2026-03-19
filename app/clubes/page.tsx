@@ -50,20 +50,20 @@ export default function ClubesPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans pb-20 selection:bg-[#fcc200]/30">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto p-6 md:p-12">
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12">
         <FadeInUp>
           <header className="mb-12 md:mb-16 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-              <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
+              <h1 className="text-3xl sm:text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
                 Clubes <span className="text-[#fcc200]">Oficiales</span>
               </h1>
               <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mt-3 italic">
                 Plebeians League Franchise Directory
               </p>
             </div>
-            <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3 shadow-xl">
+            <div className="px-4 sm:px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3 shadow-xl">
               <Shield size={20} className="text-[#fcc200]" />
-              <span className="text-lg font-black text-white">{clubes.length} <span className="text-[10px] text-zinc-500 uppercase tracking-widest ml-1">Equipos Inscritos</span></span>
+              <span className="text-base sm:text-lg font-black text-white">{clubes.length} <span className="text-[9px] sm:text-[10px] text-zinc-500 uppercase tracking-widest ml-1">Equipos Inscritos</span></span>
             </div>
           </header>
         </FadeInUp>
@@ -79,14 +79,14 @@ export default function ClubesPage() {
               <GridItem key={club.id}>
                 {/* 🔥 RECICLAMOS EXACTAMENTE TU DISEÑO DEL MAIN */}
                 <Link href={`/equipo/${club.id}`} className="group block h-full">
-                  <div className="relative bg-[#141414] rounded-[2.5rem] border border-white/5 p-8 flex flex-col items-center transition-all duration-500 group-hover:bg-[#1a1a1a] group-hover:border-[#fcc200]/30 shadow-2xl h-full overflow-hidden">
+                  <div className="relative bg-[#141414] rounded-[2.2rem] sm:rounded-[2.5rem] border border-white/5 p-5 sm:p-8 flex flex-col items-center transition-all duration-500 group-hover:bg-[#1a1a1a] group-hover:border-[#fcc200]/30 shadow-2xl h-full overflow-hidden">
                     {/* Línea superior con el color del equipo */}
                     <div 
                       className="absolute top-0 left-0 w-full h-1 opacity-20 transition-opacity group-hover:opacity-100" 
                       style={{ backgroundColor: club.color_hex || '#fcc200' }} 
                     />
                     
-                    <div className="w-24 h-24 mb-6 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 mb-5 sm:mb-6 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
                       <img 
                         src={club.escudo_url || '/placeholder.png'} 
                         alt={club.nombre} 

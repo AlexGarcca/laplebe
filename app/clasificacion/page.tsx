@@ -93,10 +93,10 @@ export default function ClasificacionPage() {
       <Navbar />
       <MatchTicker />
 
-      <main className="max-w-7xl mx-auto p-4 md:p-12 mt-8">
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 mt-6 md:mt-8">
         <header className="mb-12 md:mb-16 text-center">
           <FadeInUp>
-            <h1 className="text-4xl md:text-7xl font-black uppercase italic tracking-tighter text-white mb-4 leading-none">
+            <h1 className="text-3xl sm:text-4xl md:text-7xl font-black uppercase italic tracking-tighter text-white mb-4 leading-none">
               Tabla <span className="text-[#fcc200]">General</span>
             </h1>
             <p className="text-zinc-500 text-[9px] md:text-[11px] font-black uppercase tracking-[0.5em]">Temporada Regular • Split 3</p>
@@ -109,11 +109,11 @@ export default function ClasificacionPage() {
           className="bg-[#141414] rounded-4xl md:rounded-[3rem] border border-white/5 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]"
         >
           <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full border-collapse min-w-187.5 md:min-w-full">
+            <table className="w-full border-collapse min-w-165 md:min-w-full">
               <thead>
                 <tr className="bg-black/60 text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 border-b border-white/5">
                   <th className="w-16 py-6 text-center">Rk</th>
-                  <th className="px-6 py-6 text-left sticky left-0 bg-black/60 md:relative z-10 backdrop-blur-md">Franquicia</th>
+                  <th className="px-3 md:px-6 py-6 text-left sticky left-0 bg-black/60 md:relative z-10 backdrop-blur-md">Franquicia</th>
                   <th className="w-14 py-6 text-center" title="Partidos Jugados">PJ</th>
                   <th className="w-20 py-6 text-center text-[#fcc200] bg-[#fcc200]/5 text-xs" title="Puntos">PTS</th>
                   <th className="w-14 py-6 text-center" title="Victoria Regular (3 Pts)">V</th>
@@ -145,7 +145,7 @@ export default function ClasificacionPage() {
                         </div>
                       </td>
                       
-                      <td className="px-6 py-4 text-left sticky left-0 bg-[#141414] group-hover:bg-[#1a1a1a] transition-colors md:relative z-10">
+                      <td className="px-3 md:px-6 py-4 text-left sticky left-0 bg-[#141414] group-hover:bg-[#1a1a1a] transition-colors md:relative z-10">
                         <Link href={`/equipo/${equipo.id}`} className="flex items-center gap-4 cursor-pointer">
                           <img src={equipo.escudo} className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-md group-hover:scale-110 transition-transform" alt="" />
                           <div className="flex flex-col">

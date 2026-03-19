@@ -25,7 +25,7 @@ export const StaggeredGrid = ({ children }: { children: ReactNode }) => (
     variants={{
       visible: { transition: { staggerChildren: 0.05 } } // Retraso de 0.05s entre cada card
     }}
-    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6"
   >
     {children}
   </motion.div>

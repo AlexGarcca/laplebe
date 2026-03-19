@@ -152,25 +152,25 @@ export default function BetAlvPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] pb-20">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto p-6 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
         
         <div className="lg:col-span-8">
           <header className="mb-10">
-            <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
               BET-<span className="text-[#fcc200]">ALV</span>
             </h1>
             <div className="flex items-center gap-4 mt-4">
-              <div className="px-5 py-3 bg-[#fcc200]/10 border border-[#fcc200]/20 rounded-2xl flex items-center gap-3">
+              <div className="px-4 sm:px-5 py-3 bg-[#fcc200]/10 border border-[#fcc200]/20 rounded-2xl flex items-center gap-3">
                 <Coins size={20} className="text-[#fcc200]" />
-                <span className="text-lg font-black text-white italic">{saldo}M <span className="text-zinc-500 not-italic text-[10px] ml-2 tracking-widest uppercase">Lana disponible</span></span>
+                <span className="text-base sm:text-lg font-black text-white italic">{saldo}M <span className="text-zinc-500 not-italic text-[9px] sm:text-[10px] ml-2 tracking-widest uppercase">Lana disponible</span></span>
               </div>
             </div>
           </header>
 
           <div className="space-y-4">
             {partidos.map((p) => (
-              <div key={p.id} className="bg-[#141414] border border-white/5 p-8 rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-[#181818] transition-all">
-                <div className="flex items-center gap-10 flex-1 justify-center md:justify-start">
+              <div key={p.id} className="bg-[#141414] border border-white/5 p-5 sm:p-8 rounded-[2.3rem] sm:rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-[#181818] transition-all">
+                <div className="flex items-center gap-5 sm:gap-10 flex-1 justify-center md:justify-start w-full">
                   <div className="text-center">
                     <img src={p.local.escudo_url} className="w-16 h-16 mx-auto mb-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]" alt="" />
                     <p className="text-[11px] font-black uppercase italic text-white">{p.local.nombre}</p>
@@ -182,7 +182,7 @@ export default function BetAlvPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-3 w-full md:w-auto">
+                <div className="flex gap-2 sm:gap-3 w-full md:w-auto">
                   {['LOCAL', 'EMPATE', 'VISITA'].map((label) => {
                     const m = p.momios[label]
                     const isSelected = ticket.find(t => t.partidoId === p.id && t.seleccion === label)
@@ -190,7 +190,7 @@ export default function BetAlvPage() {
                       <button 
                         key={label}
                         onClick={() => addToTicket(p, label, parseFloat(m))}
-                        className={`flex-1 md:flex-none px-6 py-4 rounded-2xl border transition-all group cursor-pointer ${isSelected ? 'bg-[#fcc200] border-[#fcc200] text-black scale-105' : 'bg-black border-white/5 hover:border-[#fcc200] text-zinc-500'}`}
+                        className={`flex-1 md:flex-none px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl border transition-all group cursor-pointer ${isSelected ? 'bg-[#fcc200] border-[#fcc200] text-black scale-105' : 'bg-black border-white/5 hover:border-[#fcc200] text-zinc-500'}`}
                       >
                         <p className={`text-[8px] font-black uppercase mb-1 ${isSelected ? 'text-black/50' : 'text-zinc-600'}`}>{label}</p>
                         <p className={`text-lg font-black ${isSelected ? 'text-black' : 'text-[#fcc200]'}`}>{m}</p>
@@ -204,7 +204,7 @@ export default function BetAlvPage() {
         </div>
 
         <div className="lg:col-span-4">
-          <div className="sticky top-32 bg-[#141414] border-2 border-[#fcc200]/20 rounded-[3rem] p-10 shadow-2xl backdrop-blur-md">
+          <div className="lg:sticky lg:top-32 bg-[#141414] border-2 border-[#fcc200]/20 rounded-[2.3rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-2xl backdrop-blur-md">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-xl font-black uppercase italic text-white flex items-center gap-3">
                 <TrendingUp size={24} className="text-[#fcc200]" /> Ticket
@@ -214,7 +214,7 @@ export default function BetAlvPage() {
               </span>
             </div>
 
-            <div className="space-y-4 mb-8 max-h-[40vh] overflow-y-auto pr-3 custom-scrollbar">
+            <div className="space-y-4 mb-8 max-h-[45vh] lg:max-h-[40vh] overflow-y-auto pr-2 sm:pr-3 custom-scrollbar">
               {ticket.map((t, i) => (
                 <div key={i} className="bg-black/50 p-5 rounded-3xl border border-white/5 relative group animate-in slide-in-from-right duration-300">
                   <button onClick={() => setTicket(ticket.filter(x => x.partidoId !== t.partidoId))} className="absolute -top-2 -right-2 w-7 h-7 bg-rose-500 text-white rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-lg cursor-pointer"><X size={14} /></button>
@@ -234,7 +234,7 @@ export default function BetAlvPage() {
               </div>
               
               <div className="relative">
-                <input type="number" placeholder="DINERO A JUGAR..." className="w-full bg-black/60 border-2 border-white/5 rounded-2xl px-6 py-5 text-lg font-black text-white outline-none focus:border-[#fcc200] transition-all" value={apuestaMonto} onChange={(e) => setApuestaMonto(e.target.value)} />
+                <input type="number" placeholder="DINERO A JUGAR..." className="w-full bg-black/60 border-2 border-white/5 rounded-2xl px-5 sm:px-6 py-4 sm:py-5 text-base sm:text-lg font-black text-white outline-none focus:border-[#fcc200] transition-all" value={apuestaMonto} onChange={(e) => setApuestaMonto(e.target.value)} />
                 <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-zinc-700">M</span>
               </div>
 
@@ -249,7 +249,7 @@ export default function BetAlvPage() {
               <button 
                 onClick={handlePlaceBet}
                 disabled={ticket.length === 0 || !apuestaMonto || enviando}
-                className="w-full py-6 bg-[#fcc200] text-black rounded-4xl font-black uppercase italic tracking-widest hover:scale-[1.03] active:scale-95 transition-all disabled:opacity-20 shadow-2xl shadow-[#fcc200]/20 cursor-pointer flex items-center justify-center gap-3"
+                className="w-full py-5 sm:py-6 bg-[#fcc200] text-black rounded-4xl font-black uppercase italic tracking-[0.14em] sm:tracking-widest hover:scale-[1.03] active:scale-95 transition-all disabled:opacity-20 shadow-2xl shadow-[#fcc200]/20 cursor-pointer flex items-center justify-center gap-3 text-sm sm:text-base"
               >
                 {enviando ? <Loader2 className="animate-spin" /> : 'METER APUESTA ALV 🎰'}
               </button>

@@ -121,12 +121,12 @@ export default function VestidorPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans pb-20">
       <Navbar />
-      <main className="max-w-7xl mx-auto p-4 md:p-12">
-        <header className="mb-8 bg-linear-to-b from-[#141414] to-transparent border border-white/5 p-6 md:p-10 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-6">
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12">
+        <header className="mb-8 bg-linear-to-b from-[#141414] to-transparent border border-white/5 p-4 sm:p-6 md:p-10 rounded-[2.2rem] sm:rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
             <img src={equipo.escudo_url} className="w-20 h-20 object-contain drop-shadow-2xl" alt="" />
             <div>
-              <h1 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter leading-none mb-2 text-white">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black uppercase italic tracking-tighter leading-none mb-2 text-white text-center md:text-left">
                 Manager <span className="text-[#fcc200]">{perfil.nombre_presidente.split(' ')[0]}</span>
               </h1>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
@@ -144,7 +144,7 @@ export default function VestidorPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 flex flex-col gap-6">
-            <div className="bg-[#141414] rounded-[3rem] border border-white/5 p-4 md:p-10 shadow-2xl">
+            <div className="bg-[#141414] rounded-[2.2rem] sm:rounded-[3rem] border border-white/5 p-4 md:p-10 shadow-2xl">
               <div className="flex justify-between items-center mb-6 px-2">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 flex items-center gap-2"><LayoutDashboard size={14} className="text-[#fcc200]" /> Pizarra Táctica</h3>
                 <span className="text-[10px] font-bold uppercase italic text-zinc-700">Formación 4-1</span>
@@ -159,7 +159,7 @@ export default function VestidorPage() {
                 {/* JUGADORES DE CAMPO */}
                 <div className="relative z-10 flex justify-between items-center w-full px-2 mb-8">
                   {['j1', 'j2', 'j3', 'j4'].map((pos, idx) => (
-                    <div key={pos} className="w-[23%] max-w-30 group">
+                    <div key={pos} className="w-[24%] max-w-30 group">
                       <div className="relative aspect-square bg-zinc-900/90 rounded-xl border border-white/10 group-hover:border-[#fcc200]/50 transition-all flex flex-col items-center justify-center backdrop-blur-sm cursor-pointer">
                         <span className="text-[7px] font-black text-zinc-500 absolute top-1.5 uppercase">J{idx + 1}</span>
                         <select 
@@ -187,7 +187,7 @@ export default function VestidorPage() {
 
                 {/* PORTERO */}
                 <div className="relative z-10 flex justify-center w-full">
-                  <div className="w-[25%] max-w-32.5 group">
+                  <div className="w-[28%] sm:w-[25%] max-w-32.5 group">
                     <div className="relative aspect-square bg-[#fcc200]/5 rounded-xl border-2 border-[#fcc200]/20 group-hover:border-[#fcc200] transition-all flex flex-col items-center justify-center backdrop-blur-md cursor-pointer">
                       <select 
                         className="w-full h-full bg-transparent text-[9px] md:text-xs font-black uppercase text-center outline-none cursor-pointer appearance-none text-[#fcc200] z-10 pt-2 px-1" 
@@ -214,7 +214,7 @@ export default function VestidorPage() {
               <button 
                 onClick={handleConfirm} 
                 disabled={enviando || !proximoPartido || tiempoRestante === "VESTIDOR CERRADO 🔒"} 
-                className="mt-8 w-full py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-30 shadow-xl shadow-[#fcc200]/10 flex items-center justify-center gap-3 cursor-pointer"
+                className="mt-8 w-full py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-[0.14em] sm:tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-30 shadow-xl shadow-[#fcc200]/10 flex items-center justify-center gap-3 cursor-pointer text-sm sm:text-base"
               >
                 <ShieldCheck size={20} />{enviando ? 'ENVIANDO...' : 'CONFIRMAR TITULARES'}
               </button>

@@ -200,9 +200,9 @@ export default function AdminResultadosPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans pb-20">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto p-6 md:p-12">
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12">
         <header className="mb-8">
-          <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">
             Resultados <span className="text-[#fcc200]">Globales</span>
           </h1>
           <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2 italic">Match Settlement Console</p>
@@ -215,7 +215,7 @@ export default function AdminResultadosPage() {
                 <button 
                   key={j} 
                   onClick={() => setJornadaSeleccionada(j)}
-                  className={`px-6 py-3 rounded-2xl font-black uppercase italic tracking-widest whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl font-black uppercase italic tracking-[0.14em] sm:tracking-widest whitespace-nowrap transition-all cursor-pointer text-sm sm:text-base ${
                     jornadaSeleccionada === j 
                     ? 'bg-[#fcc200] text-black shadow-[0_0_20px_rgba(252,194,0,0.3)]' 
                     : 'bg-[#141414] text-zinc-600 hover:text-white border border-white/5 hover:border-white/20'
@@ -242,7 +242,7 @@ export default function AdminResultadosPage() {
         ) : (
           <div className="space-y-8 animate-in fade-in zoom-in-95 duration-300">
             {/* CABECERA Y MARCADOR */}
-            <div className="bg-[#141414] border-2 border-[#fcc200]/20 rounded-[3rem] p-8 md:p-12 shadow-2xl">
+            <div className="bg-[#141414] border-2 border-[#fcc200]/20 rounded-[2.2rem] sm:rounded-[3rem] p-5 sm:p-8 md:p-12 shadow-2xl">
               <div className="flex flex-col items-center mb-6">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#fcc200] mb-2 bg-[#fcc200]/10 px-4 py-1 rounded-full border border-[#fcc200]/20">Jornada {partidoSeleccionado.jornada}</span>
               </div>
@@ -250,7 +250,7 @@ export default function AdminResultadosPage() {
               <div className="flex flex-col md:flex-row items-center justify-between gap-8 w-full">
                 <div className="flex flex-col items-center gap-4 w-full md:w-1/3">
                   <img src={partidoSeleccionado.local.escudo_url} className="w-20 h-20 md:w-24 md:h-24 object-contain" alt="" />
-                  <input type="number" min="0" value={golesLocal} onChange={e => setGolesLocal(parseInt(e.target.value) || 0)} className="w-24 h-28 bg-black border border-white/10 rounded-3xl text-6xl font-black text-center text-white outline-none focus:border-[#fcc200] shadow-inner" />
+                  <input type="number" min="0" value={golesLocal} onChange={e => setGolesLocal(parseInt(e.target.value) || 0)} className="w-20 sm:w-24 h-22 sm:h-28 bg-black border border-white/10 rounded-3xl text-5xl sm:text-6xl font-black text-center text-white outline-none focus:border-[#fcc200] shadow-inner" />
                   <div className="w-full mt-4">
                     <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2 justify-center"><Shield size={12}/> Portero Local</label>
                     <select value={porteroLocalId} onChange={e => setPorteroLocalId(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none focus:border-[#fcc200] text-center cursor-pointer">
@@ -264,7 +264,7 @@ export default function AdminResultadosPage() {
 
                 <div className="flex flex-col items-center gap-4 w-full md:w-1/3">
                   <img src={partidoSeleccionado.visita.escudo_url} className="w-20 h-20 md:w-24 md:h-24 object-contain" alt="" />
-                  <input type="number" min="0" value={golesVisita} onChange={e => setGolesVisita(parseInt(e.target.value) || 0)} className="w-24 h-28 bg-black border border-white/10 rounded-3xl text-6xl font-black text-center text-white outline-none focus:border-[#fcc200] shadow-inner" />
+                  <input type="number" min="0" value={golesVisita} onChange={e => setGolesVisita(parseInt(e.target.value) || 0)} className="w-20 sm:w-24 h-22 sm:h-28 bg-black border border-white/10 rounded-3xl text-5xl sm:text-6xl font-black text-center text-white outline-none focus:border-[#fcc200] shadow-inner" />
                   <div className="w-full mt-4">
                     <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2 justify-center"><Shield size={12}/> Portero Visita</label>
                     <select value={porteroVisitaId} onChange={e => setPorteroVisitaId(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none focus:border-[#fcc200] text-center cursor-pointer">
@@ -294,13 +294,13 @@ export default function AdminResultadosPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {[ { titulo: partidoSeleccionado.local.nombre, escudo: partidoSeleccionado.local.escudo_url, jugadores: jugadoresLocal },
                  { titulo: partidoSeleccionado.visita.nombre, escudo: partidoSeleccionado.visita.escudo_url, jugadores: jugadoresVisita } ].map((equipo, idx) => (
-                <div key={idx} className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-6 shadow-xl overflow-x-auto">
-                  <div className="flex items-center gap-3 mb-6 px-2 min-w-125">
+                <div key={idx} className="bg-[#141414] border border-white/5 rounded-[2.5rem] p-4 sm:p-6 shadow-xl overflow-x-auto">
+                  <div className="flex items-center gap-3 mb-6 px-2 min-w-140">
                     <img src={equipo.escudo} className="w-8 h-8" alt="" />
                     <h3 className="text-lg font-black uppercase italic text-white">{equipo.titulo}</h3>
                   </div>
 
-                  <div className="grid grid-cols-12 gap-2 mb-4 px-2 text-[8px] font-black text-zinc-500 uppercase tracking-widest min-w-125">
+                  <div className="grid grid-cols-12 gap-2 mb-4 px-2 text-[8px] font-black text-zinc-500 uppercase tracking-widest min-w-140">
                     <div className="col-span-4">Jugador</div>
                     <div className="col-span-2 text-center">Gol</div>
                     <div className="col-span-2 text-center">Ast</div>
@@ -309,7 +309,7 @@ export default function AdminResultadosPage() {
                     <div className="col-span-2 text-center">Rtg</div>
                   </div>
 
-                  <div className="space-y-2 min-w-125">
+                  <div className="space-y-2 min-w-140">
                     {equipo.jugadores.map((j) => (
                       <div key={j.id} className="grid grid-cols-12 gap-2 items-center bg-black/40 p-2 rounded-xl border border-white/5 hover:border-[#fcc200]/20 transition-colors">
                         <div className="col-span-4 flex items-center gap-2 overflow-hidden">
@@ -328,11 +328,11 @@ export default function AdminResultadosPage() {
               ))}
             </div>
 
-            <div className="flex justify-end gap-4 mt-8 pb-10">
-              <button onClick={() => setPartidoSeleccionado(null)} className="px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors cursor-pointer">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 mt-8 pb-10">
+              <button onClick={() => setPartidoSeleccionado(null)} className="px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors cursor-pointer w-full sm:w-auto">
                 Cancelar
               </button>
-              <button onClick={handleGuardar} disabled={guardando} className="px-10 py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-3 shadow-[0_0_40px_rgba(252,194,0,0.3)] cursor-pointer disabled:opacity-50">
+              <button onClick={handleGuardar} disabled={guardando} className="px-8 sm:px-10 py-4 sm:py-5 bg-[#fcc200] text-black rounded-2xl font-black uppercase italic tracking-[0.14em] sm:tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(252,194,0,0.3)] cursor-pointer disabled:opacity-50 w-full sm:w-auto text-sm sm:text-base">
                 <Save size={20} />
                 {guardando ? 'GUARDANDO...' : 'CERRAR PARTIDO Y PAGAR APUESTAS'}
               </button>

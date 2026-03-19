@@ -87,10 +87,10 @@ export default function AdminPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f7] font-sans pb-20">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto p-6 md:p-12">
+      <main className="max-w-6xl mx-auto p-4 sm:p-6 md:p-12">
         <header className="mb-12 flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
-            <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white text-center md:text-left">
               Panel de <span className="text-[#fcc200]">Control</span>
             </h1>
             <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] mt-2 italic">Plebeians League Authorization Hub</p>
@@ -113,7 +113,7 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Link 
               href="/admin-resultados" 
-              className="bg-[#141414] border border-[#fcc200]/20 p-8 rounded-[2.5rem] flex flex-col items-center justify-center gap-5 hover:bg-[#1a1a1a] hover:scale-105 hover:border-[#fcc200]/50 transition-all shadow-[0_0_30px_rgba(252,194,0,0.05)] hover:shadow-[0_0_30px_rgba(252,194,0,0.15)] group cursor-pointer"
+              className="bg-[#141414] border border-[#fcc200]/20 p-6 sm:p-8 rounded-[2.5rem] flex flex-col items-center justify-center gap-5 hover:bg-[#1a1a1a] hover:scale-105 hover:border-[#fcc200]/50 transition-all shadow-[0_0_30px_rgba(252,194,0,0.05)] hover:shadow-[0_0_30px_rgba(252,194,0,0.15)] group cursor-pointer"
             >
               <div className="w-16 h-16 bg-[#fcc200]/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Trophy size={32} className="text-[#fcc200]" />
@@ -178,7 +178,7 @@ export default function AdminPage() {
 
                   <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
                     <select 
-                      className="bg-black border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-[#fcc200] transition-all flex-1 md:flex-none min-w-50 cursor-pointer"
+                      className="bg-black border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-[#fcc200] transition-all flex-1 md:flex-none min-w-0 md:min-w-50 cursor-pointer w-full md:w-auto"
                       value={presi.equipo_id || ""}
                       onChange={(e) => handleUpdate(presi.id, e.target.value, presi.aprobado, presi.aprobado, presi.saldo_bet ?? null)}
                     >

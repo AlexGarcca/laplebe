@@ -46,14 +46,14 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="backdrop-blur-2xl bg-black/80 border-b border-white/5 sticky top-0 z-100 px-6 md:px-8 py-5 flex items-center justify-between">
+    <nav className="backdrop-blur-2xl bg-black/80 border-b border-white/5 sticky top-0 z-100 px-4 sm:px-6 md:px-8 py-4 md:py-5 flex items-center justify-between">
       
       {/* LOGO LIGA */}
-      <Link href="/" className="flex items-center gap-4 group cursor-pointer">
+      <Link href="/" className="flex items-center gap-2 sm:gap-4 group cursor-pointer min-w-0">
         <div className="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-110">
           <img src="/LOGO_PNG.png" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(252,194,0,0.3)]" alt="Logo" />
         </div>
-        <div className="text-xl md:text-2xl font-black italic tracking-tighter text-white uppercase group-hover:text-[#fcc200] transition-colors">
+        <div className="text-base sm:text-xl md:text-2xl font-black italic tracking-tighter text-white uppercase group-hover:text-[#fcc200] transition-colors truncate">
           Plebeians <span className="text-[#fcc200]">League</span>
         </div>
       </Link>
@@ -130,14 +130,14 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 w-full bg-black/95 backdrop-blur-3xl border-b border-white/5 p-8 flex flex-col gap-6 md:hidden"
+            className="absolute top-full left-0 w-full bg-black/95 backdrop-blur-3xl border-b border-white/5 p-5 sm:p-8 flex flex-col gap-5 sm:gap-6 md:hidden"
           >
             {links.map((link) => (
               <Link 
                 key={link.href} 
                 href={link.href} 
                 onClick={() => setIsOpen(false)} 
-                className={`text-2xl font-black uppercase italic cursor-pointer ${link.name === 'BET-ALV' ? 'text-[#fcc200]' : 'text-white'}`}
+                className={`text-xl sm:text-2xl font-black uppercase italic cursor-pointer ${link.name === 'BET-ALV' ? 'text-[#fcc200]' : 'text-white'}`}
               >
                 {link.name}
               </Link>
@@ -155,10 +155,10 @@ export default function Navbar() {
 
             {user && perfil?.equipos ? (
               <>
-                <Link href="/vestidor" onClick={() => setIsOpen(false)} className="mt-4 p-6 bg-white/5 border border-white/10 rounded-4xl flex items-center justify-between cursor-pointer">
+                <Link href="/vestidor" onClick={() => setIsOpen(false)} className="mt-4 p-4 sm:p-6 bg-white/5 border border-white/10 rounded-4xl flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-4">
                     <img src={perfil.equipos.escudo_url} className="w-12 h-12 object-contain" alt="" />
-                    <p className="text-xl font-black text-white uppercase italic">{perfil.equipos.nombre}</p>
+                    <p className="text-base sm:text-xl font-black text-white uppercase italic">{perfil.equipos.nombre}</p>
                   </div>
                   <LayoutDashboard className="text-[#fcc200]" size={24} />
                 </Link>
