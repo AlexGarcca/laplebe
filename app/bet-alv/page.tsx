@@ -19,11 +19,36 @@ export default function BetAlvPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [jornadaActiva, setJornadaActiva] = useState<number>(1)
   const [cierreJornadaUtc, setCierreJornadaUtc] = useState<Date | null>(null)
+  const [mobilePanel, setMobilePanel] = useState<'ticket' | 'historial'>('ticket')
   const router = useRouter()
+
+  const MOBILE_PANEL_STORAGE_KEY = 'bet_alv_mobile_panel'
+
+  const switchMobilePanel = (panel: 'ticket' | 'historial') => {
+    setMobilePanel(panel)
+
+    // Mobile-first: al cambiar panel, regresamos al tope para mostrar el inicio del bloque.
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   useEffect(() => {
     checkAuthAndFetch()
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const savedPanel = window.localStorage.getItem(MOBILE_PANEL_STORAGE_KEY)
+    if (savedPanel === 'ticket' || savedPanel === 'historial') {
+      setMobilePanel(savedPanel)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(MOBILE_PANEL_STORAGE_KEY, mobilePanel)
+  }, [mobilePanel])
 
   const cargarSaldo = async (uid: string) => {
     const { data: perfil, error } = await supabase
@@ -219,6 +244,9 @@ export default function BetAlvPage() {
     } else {
       setTicket([...ticket, { partidoId: partido.id, local: partido.local.nombre, visita: partido.visita.nombre, seleccion, momio }])
     }
+
+    // En mobile priorizamos mostrar el ticket cuando se agrega/edita una seleccion.
+    switchMobilePanel('ticket')
   }
 
   const handlePlaceBet = async () => {
@@ -267,6 +295,7 @@ export default function BetAlvPage() {
       setSaldo(Number(resultado.saldo_nuevo))
       setTicket([])
       setApuestaMonto('')
+      switchMobilePanel('historial')
       
       const ticketShort = resultado.ticket_id.slice(0, 8).toUpperCase()
       alert(`¡APUESTA METIDA! Ticket: ${ticketShort} 💸\nSaldo nuevo: $${resultado.saldo_nuevo}`)
@@ -426,8 +455,23 @@ export default function BetAlvPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-4">
-          <div className="lg:sticky lg:top-32 bg-[#141414] border-2 border-[#fcc200]/20 rounded-[2.3rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-2xl backdrop-blur-md">
+        <div className="lg:col-span-4 space-y-4 sm:space-y-6">
+          <div className="lg:hidden bg-[#141414] border border-white/10 rounded-2xl p-2 flex gap-2">
+            <button
+              onClick={() => switchMobilePanel('ticket')}
+              className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${mobilePanel === 'ticket' ? 'bg-[#fcc200] text-black' : 'bg-black/40 text-zinc-400'}`}
+            >
+              Ticket ({ticket.length})
+            </button>
+            <button
+              onClick={() => switchMobilePanel('historial')}
+              className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${mobilePanel === 'historial' ? 'bg-[#fcc200] text-black' : 'bg-black/40 text-zinc-400'}`}
+            >
+              Mis Tickets ({ticketsFiltrados.length})
+            </button>
+          </div>
+
+          <div className={`${mobilePanel === 'ticket' ? 'block animate-in fade-in slide-in-from-right-2 duration-300' : 'hidden'} lg:block bg-[#141414] border-2 border-[#fcc200]/20 rounded-[2.3rem] sm:rounded-[3rem] p-5 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-md`}>
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-xl font-black uppercase italic text-white flex items-center gap-3">
                 <TrendingUp size={24} className="text-[#fcc200]" /> Ticket
@@ -437,7 +481,7 @@ export default function BetAlvPage() {
               </span>
             </div>
 
-            <div className="space-y-4 mb-8 max-h-[45vh] lg:max-h-[40vh] overflow-y-auto pr-2 sm:pr-3 custom-scrollbar">
+            <div className="space-y-4 mb-8 max-h-[30vh] sm:max-h-[38vh] lg:max-h-[40vh] overflow-y-auto pr-2 sm:pr-3 custom-scrollbar">
               {ticket.map((t, i) => (
                 <div key={i} className="bg-black/50 p-5 rounded-3xl border border-white/5 relative group animate-in slide-in-from-right duration-300">
                   <button onClick={() => setTicket(ticket.filter(x => x.partidoId !== t.partidoId))} className="absolute -top-2 -right-2 w-7 h-7 bg-rose-500 text-white rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-lg cursor-pointer"><X size={14} /></button>
@@ -450,7 +494,7 @@ export default function BetAlvPage() {
               ))}
             </div>
 
-            <div className="border-t border-white/5 pt-8 space-y-6">
+            <div className="border-t border-white/5 pt-6 sm:pt-8 space-y-6">
               <div className="flex justify-between items-center text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
                 <span>Cuota Total</span>
                 <span className="text-2xl text-white italic">{ticket.length > 0 ? momioTotal : '0.00'}</span>
@@ -479,7 +523,7 @@ export default function BetAlvPage() {
             </div>
           </div>
 
-          <div className="mt-6 bg-[#141414] border border-white/5 rounded-[2.3rem] sm:rounded-[3rem] p-6 sm:p-8">
+          <div className={`${mobilePanel === 'historial' ? 'block animate-in fade-in slide-in-from-left-2 duration-300' : 'hidden'} lg:block bg-[#141414] border border-white/5 rounded-[2.3rem] sm:rounded-[3rem] p-5 sm:p-7 lg:p-8`}>
             <div className="flex items-center justify-between gap-4 mb-5">
               <h4 className="text-lg font-black uppercase italic text-white">Mis Tickets</h4>
               <div className="flex gap-2 flex-wrap justify-end">
@@ -495,7 +539,7 @@ export default function BetAlvPage() {
               </div>
             </div>
 
-            <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
+            <div className="space-y-3 max-h-[46vh] sm:max-h-[42vh] overflow-y-auto pr-1 custom-scrollbar">
               {ticketsFiltrados.map((t) => {
                 const estadoClase = t.estado === 'ganada'
                   ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
