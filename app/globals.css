@@ -106,6 +106,15 @@ svg {
   }
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
 @keyframes fadeInUp {
   to {
     opacity: 1;
