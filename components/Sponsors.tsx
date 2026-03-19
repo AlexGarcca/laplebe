@@ -32,7 +32,7 @@ export default function Sponsors() {
             </motion.div>
           </div>
 
-          {/* GRID DE SOCIOS */}
+          {/* GRID DE SOCIOSsossos */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-y-16 gap-x-8 items-end justify-items-center">
             
             {/* TECHNICAL PARTNER */}
