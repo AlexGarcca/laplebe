@@ -99,6 +99,49 @@ END $$;
 -- PART 5: RLS POLICIES
 -- ============================================================================
 
+-- Ensure roster jersey column exists before any query/trigger that uses it.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'jugadores'
+      AND column_name = 'numero_camiseta'
+  ) THEN
+    ALTER TABLE public.jugadores ADD COLUMN numero_camiseta integer;
+  END IF;
+
+  -- Optional compatibility migration from legacy column names.
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'jugadores'
+      AND column_name = 'dorsal'
+  ) THEN
+    EXECUTE '
+      UPDATE public.jugadores
+      SET numero_camiseta = dorsal
+      WHERE numero_camiseta IS NULL
+        AND dorsal IS NOT NULL
+    ';
+  ELSIF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'jugadores'
+      AND column_name = ''numero''
+  ) THEN
+    EXECUTE '
+      UPDATE public.jugadores
+      SET numero_camiseta = numero
+      WHERE numero_camiseta IS NULL
+        AND numero IS NOT NULL
+    ';
+  END IF;
+END $$;
+
 -- Enable RLS on all betting tables
 ALTER TABLE public.bet_tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bet_movimientos ENABLE ROW LEVEL SECURITY;
@@ -157,6 +200,16 @@ BEGIN
     CREATE POLICY admin_update_jugadores ON public.jugadores
       FOR UPDATE USING (public.is_super_admin())
       WITH CHECK (public.is_super_admin());
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'jugadores' AND policyname = 'admin_insert_jugadores') THEN
+    CREATE POLICY admin_insert_jugadores ON public.jugadores
+      FOR INSERT WITH CHECK (public.is_super_admin());
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'jugadores' AND policyname = 'admin_delete_jugadores') THEN
+    CREATE POLICY admin_delete_jugadores ON public.jugadores
+      FOR DELETE USING (public.is_super_admin());
   END IF;
 END $$;
 
@@ -225,6 +278,43 @@ BEGIN
       FOR INSERT WITH CHECK (auth.uid() = user_id);
   END IF;
 END $$;
+
+-- ============================================================================
+-- PART 5B: ROSTER INTEGRITY (duplicate jersey protection)
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION public.validate_unique_jersey_per_team()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  -- Permite dorsal nulo (ej. jugador aún sin número asignado)
+  IF NEW.numero_camiseta IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.jugadores j
+    WHERE j.id_equipo = NEW.id_equipo
+      AND j.numero_camiseta = NEW.numero_camiseta
+      AND j.id <> NEW.id
+  ) THEN
+    RAISE EXCEPTION 'Dorsal % ya existe en este equipo', NEW.numero_camiseta
+      USING ERRCODE = '23505';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_validate_unique_jersey_per_team ON public.jugadores;
+
+CREATE TRIGGER trg_validate_unique_jersey_per_team
+BEFORE INSERT OR UPDATE OF id_equipo, numero_camiseta
+ON public.jugadores
+FOR EACH ROW
+EXECUTE FUNCTION public.validate_unique_jersey_per_team();
 
 -- ============================================================================
 -- PART 6: RPC FUNCTIONS

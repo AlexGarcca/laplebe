@@ -136,6 +136,19 @@ export default function AdminPage() {
               </div>
             </Link>
 
+            <Link
+              href="/admin-jugadores"
+              className="bg-[#141414] border border-cyan-500/20 p-6 sm:p-8 rounded-[2.5rem] flex flex-col items-center justify-center gap-5 hover:bg-[#1a1a1a] hover:scale-105 hover:border-cyan-400/50 transition-all shadow-[0_0_30px_rgba(34,211,238,0.05)] hover:shadow-[0_0_30px_rgba(34,211,238,0.15)] group cursor-pointer"
+            >
+              <div className="w-16 h-16 bg-cyan-500/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users size={32} className="text-cyan-400" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-black uppercase italic text-white mb-1">Plantillas & Traspasos</h3>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Mover, Editar, Agregar y Eliminar Jugadores</p>
+              </div>
+            </Link>
+
             {/* Espacio para futuras herramientas (Draft, Sanciones, etc.) */}
             <div className="bg-[#141414] border border-white/5 p-8 rounded-[2.5rem] flex flex-col items-center justify-center gap-5 opacity-50 cursor-not-allowed">
                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center">
